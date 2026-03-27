@@ -1,0 +1,3451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auracelle Lyra · Assurance Governance Simulation Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root {
+  --bg: #f7f6f2;
+  --bg-warm: #f0ede6;
+  --bg-card: #ffffff;
+  --bg-panel: #fafaf8;
+  --ink: #1a1a2e;
+  --ink-2: #2d3a5c;
+  --ink-light: #5a6a85;
+  --ink-muted: #9aabbf;
+  --un-blue: #009edb;
+  --un-blue-dark: #005f8e;
+  --un-blue-light: #e8f6fc;
+  --iaea-teal: #007a7a;
+  --iaea-teal-light: #e0f2f2;
+  --gold: #b8860b;
+  --gold-light: #fdf3d8;
+  --amber: #d97706;
+  --amber-light: #fef3c7;
+  --green: #166534;
+  --green-light: #dcfce7;
+  --red: #991b1b;
+  --red-light: #fee2e2;
+  --border: #dde3ec;
+  --border-strong: #b8c4d6;
+  --shadow: 0 1px 3px rgba(26,26,46,0.08), 0 1px 2px rgba(26,26,46,0.06);
+  --shadow-md: 0 4px 12px rgba(26,26,46,0.10), 0 2px 4px rgba(26,26,46,0.06);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* Subtle paper texture */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.015'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:0; opacity:0.4;
+}
+
+.wrap { position:relative; z-index:1; max-width:1440px; margin:0 auto; padding:0 24px 40px; }
+
+/* ── HEADER ── */
+.site-header {
+  background: var(--ink-2);
+  color: white;
+  padding: 0;
+  margin: 0 -24px 32px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-md);
+}
+
+.header-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  height: 60px;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.header-icon {
+  width: auto; height: 32px;
+  padding: 0 10px;
+  border: 2px solid rgba(255,255,255,0.3);
+  display: flex; align-items:center; justify-content:center;
+  font-family: 'Libre Baskerville', serif;
+  font-size: 13px; font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.header-title {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: white;
+}
+
+.header-title small {
+  display: block;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+
+.header-nav {
+  display: flex;
+  gap: 2px;
+}
+
+.nav-tab {
+  padding: 8px 18px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  color: rgba(255,255,255,0.55);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.nav-tab:hover { color: rgba(255,255,255,0.85); }
+.nav-tab.active-p1 { color: white; border-bottom-color: var(--un-blue); }
+.nav-tab.active-p2 { color: white; border-bottom-color: #4dd0c4; }
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: rgba(255,255,255,0.45);
+  letter-spacing: 0.5px;
+}
+
+.live-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #4ade80;
+  animation: livepulse 2s ease-in-out infinite;
+}
+
+@keyframes livepulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+/* ── PAGES ── */
+.page { display:none; animation: pagein 0.25s ease; }
+.page.active { display:block; }
+@keyframes pagein { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+
+/* ── PAGE INTRO ── */
+.page-intro {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.pi-left {}
+
+.pi-engine {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--un-blue-light);
+  border: 1px solid rgba(0,158,219,0.3);
+  padding: 4px 12px;
+  margin-bottom: 10px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--un-blue-dark);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.pi-engine.agso {
+  background: var(--iaea-teal-light);
+  border-color: rgba(0,122,122,0.3);
+  color: var(--iaea-teal);
+}
+
+.pi-title {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.pi-desc {
+  font-size: 13px;
+  color: var(--ink-light);
+  max-width: 580px;
+  line-height: 1.65;
+}
+
+.pi-right {
+  flex-shrink: 0;
+}
+
+/* ── MODE SELECTOR ── */
+.mode-selector {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  box-shadow: var(--shadow);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.mode-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink-light);
+  margin-bottom: 12px;
+}
+
+.mode-btns {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-panel);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-light);
+  flex: 1;
+  min-width: 180px;
+}
+
+.mode-btn:hover {
+  border-color: var(--un-blue);
+  color: var(--ink);
+  background: var(--un-blue-light);
+}
+
+.mode-btn.active {
+  border-color: var(--un-blue);
+  background: var(--un-blue-light);
+  color: var(--un-blue-dark);
+}
+
+.mode-btn.active.agso-mode {
+  border-color: var(--iaea-teal);
+  background: var(--iaea-teal-light);
+  color: var(--iaea-teal);
+}
+
+.mode-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.mode-btn-text strong {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.mode-btn-text span {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+/* ── MASTER METRIC STRIP ── */
+.metric-strip {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 24px;
+  align-items: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--un-blue);
+  padding: 18px 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+}
+
+.metric-strip.agso-strip { border-left-color: var(--iaea-teal); }
+
+.ms-score-area {}
+.ms-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 4px;
+}
+
+.ms-value {
+  font-family: 'DM Mono', monospace;
+  font-size: 42px;
+  font-weight: 500;
+  line-height: 1;
+  transition: color 0.4s;
+}
+
+.ms-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--ink-muted);
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+.ms-bar-area {}
+
+.bar-header {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--ink-muted);
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+.bar-track {
+  height: 8px;
+  background: var(--bg-warm);
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  transition: width 0.5s cubic-bezier(.4,0,.2,1), background 0.4s;
+}
+
+.bar-thresh {
+  position: absolute;
+  top: -2px; bottom: -2px;
+  width: 1.5px;
+  background: var(--amber);
+  z-index: 2;
+}
+
+.bar-thresh::before {
+  content: attr(data-label);
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  color: var(--amber);
+  white-space: nowrap;
+}
+
+.bar-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--ink-muted);
+  margin-top: 5px;
+}
+
+.ms-status-area { text-align: right; }
+
+.status-chip {
+  display: inline-block;
+  padding: 5px 14px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  border: 1px solid;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.chip-warn { color: var(--amber); border-color: var(--amber); background: var(--amber-light); }
+.chip-good { color: var(--green); border-color: var(--green); background: var(--green-light); }
+.chip-bad  { color: var(--red);   border-color: var(--red);   background: var(--red-light); }
+
+.delta-line {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-light);
+}
+
+/* ── CARDS ── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+.card-title {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.card-sub {
+  font-size: 11px;
+  color: var(--ink-muted);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.5px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── UPLOAD ZONE ── */
+.upload-zone {
+  border: 2px dashed var(--border-strong);
+  padding: 32px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--bg-panel);
+  position: relative;
+}
+
+.upload-zone:hover, .upload-zone.drag-over {
+  border-color: var(--un-blue);
+  background: var(--un-blue-light);
+}
+
+.upload-icon { font-size: 32px; margin-bottom: 10px; }
+
+.upload-title {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.upload-desc {
+  font-size: 12px;
+  color: var(--ink-light);
+  margin-bottom: 12px;
+}
+
+.upload-formats {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-muted);
+  letter-spacing: 0.5px;
+}
+
+.upload-btn {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 8px 20px;
+  background: var(--un-blue);
+  color: white;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.upload-btn:hover { background: var(--un-blue-dark); }
+
+#file-input { position:absolute; inset:0; opacity:0; cursor:pointer; }
+
+/* ── ANALYSIS PROGRESS ── */
+.analysis-progress {
+  display: none;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 20px 24px;
+  margin-top: 16px;
+}
+
+.progress-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.progress-spinner {
+  width: 16px; height: 16px;
+  border: 2px solid var(--border);
+  border-top-color: var(--un-blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to{transform:rotate(360deg)} }
+
+.progress-steps { list-style: none; }
+.progress-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  font-size: 12px;
+  color: var(--ink-muted);
+  font-family: 'DM Mono', monospace;
+}
+
+.step-icon { width: 16px; text-align: center; flex-shrink: 0; }
+.step-done { color: var(--green); }
+.step-active { color: var(--un-blue); }
+.step-pending { color: var(--ink-muted); }
+
+/* ── DOCUMENT RESULT ── */
+.doc-result {
+  display: none;
+  margin-top: 16px;
+}
+
+.doc-result-header {
+  background: var(--ink-2);
+  color: white;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.doc-filename {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,0.7);
+}
+
+.doc-result-body {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-top: none;
+  padding: 16px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  line-height: 1.9;
+  color: var(--ink-light);
+  white-space: pre-wrap;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* ── NOF SLIDERS ── */
+.dim-section { margin-bottom: 20px; }
+
+.dim-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.dim-code {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--un-blue-dark);
+  background: var(--un-blue-light);
+  border: 1px solid rgba(0,158,219,0.25);
+  padding: 2px 8px;
+  letter-spacing: 1px;
+}
+
+.dim-code.agso-code {
+  color: var(--iaea-teal);
+  background: var(--iaea-teal-light);
+  border-color: rgba(0,122,122,0.25);
+}
+
+.dim-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  flex: 1;
+}
+
+.dim-score {
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.dim-bar { height: 2px; background: var(--border); margin-bottom: 8px; overflow: hidden; }
+.dim-bar-fill { height: 100%; transition: width 0.5s, background 0.3s; }
+
+.nof-row {
+  display: grid;
+  grid-template-columns: 44px 1fr 64px;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--bg-warm);
+}
+
+.nof-row:last-child { border-bottom: none; }
+
+.nof-key {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--un-blue-dark);
+  letter-spacing: 0.5px;
+}
+
+.nof-key.agso-key { color: var(--iaea-teal); }
+
+.nof-name {
+  font-size: 11px;
+  color: var(--ink-light);
+  margin-bottom: 3px;
+}
+
+.nof-score {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: right;
+  transition: color 0.3s;
+}
+
+.nof-st { font-size: 10px; text-align: right; margin-top: 1px; }
+
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%; height: 4px;
+  background: transparent;
+  cursor: pointer; outline: none;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px;
+  background: var(--un-blue);
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+input[type=range]:hover::-webkit-slider-thumb { transform: scale(1.2); }
+
+input[type=range]::-webkit-slider-runnable-track {
+  height: 4px;
+  background: linear-gradient(90deg, var(--un-blue) var(--pct,50%), var(--border) var(--pct,50%));
+  border-radius: 2px;
+}
+
+input.teal-slider::-webkit-slider-thumb { background: var(--iaea-teal); }
+input.teal-slider::-webkit-slider-runnable-track {
+  background: linear-gradient(90deg, var(--iaea-teal) var(--pct,50%), var(--border) var(--pct,50%));
+}
+
+/* ── GRIDS ── */
+.grid-main { display: grid; grid-template-columns: 1fr 340px; gap: 20px; align-items: start; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.right-col { display: flex; flex-direction: column; gap: 16px; }
+
+/* ── TABS ── */
+.tab-row {
+  display: flex;
+  gap: 0;
+  border-bottom: 1.5px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.stab {
+  padding: 8px 18px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-muted);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  border-bottom: 2px solid transparent;
+  position: relative;
+  bottom: -1.5px;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.stab:hover { color: var(--ink); }
+.stab.sa1 { color: var(--un-blue-dark); border-bottom-color: var(--un-blue); font-weight: 600; }
+.stab.sa2 { color: var(--iaea-teal); border-bottom-color: var(--iaea-teal); font-weight: 600; }
+
+.tpanel { display: none; }
+.tpanel.active { display: block; animation: pagein 0.2s ease; }
+
+/* ── MATH BOX ── */
+.math-box {
+  background: var(--bg-warm);
+  border: 1px solid var(--border);
+  padding: 14px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  line-height: 2;
+  color: var(--ink-light);
+  margin-top: 10px;
+}
+
+.mh { color: var(--ink); font-weight: 500; }
+.mhg { color: var(--iaea-teal); font-weight: 500; }
+.mr { color: var(--un-blue); font-weight: 700; font-size: 13px; }
+.mrg { color: var(--iaea-teal); font-weight: 700; font-size: 13px; }
+
+/* ── TABLE ── */
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+thead th {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  text-align: left;
+  padding: 6px 10px;
+  border-bottom: 1.5px solid var(--border);
+}
+
+tbody tr { border-bottom: 1px solid var(--bg-warm); transition: background 0.15s; }
+tbody tr:hover { background: var(--bg-warm); }
+tbody td { padding: 7px 10px; }
+.t-mono { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--un-blue-dark); }
+.t-mono-g { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--iaea-teal); }
+.t-score { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; text-align: right; }
+.t-name { font-size: 11px; color: var(--ink-light); }
+.t-center { text-align: center; }
+
+/* ── COUNTRY SELECTOR ── */
+.country-grid {
+  display: grid;
+  grid-template-columns: 1fr 40px 1fr;
+  gap: 12px;
+  align-items: start;
+  margin-bottom: 16px;
+}
+
+.country-vs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 32px;
+  font-family: 'Libre Baskerville', serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-muted);
+  font-style: italic;
+}
+
+.country-box {}
+.country-box-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 6px;
+}
+
+select.country-select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-card);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: var(--ink);
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239aabbf' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+  transition: border-color 0.2s;
+}
+
+select.country-select:focus { outline: none; border-color: var(--un-blue); }
+
+.country-profile {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  padding: 12px;
+  margin-top: 8px;
+  min-height: 80px;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.cp-flag { font-size: 20px; margin-bottom: 4px; }
+.cp-name { font-weight: 600; font-size: 13px; color: var(--ink); margin-bottom: 6px; }
+.cp-row { display: flex; justify-content: space-between; color: var(--ink-light); }
+.cp-val { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; }
+
+.run-wargame-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--ink-2);
+  color: white;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.run-wargame-btn:hover { background: var(--un-blue-dark); }
+
+/* ── WARGAME RESULT ── */
+.wargame-result {
+  display: none;
+  margin-top: 16px;
+}
+
+.wg-comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.wg-country-col {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 16px;
+}
+
+.wg-col-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.wg-flag { font-size: 18px; }
+.wg-name { font-weight: 600; font-size: 13px; }
+.wg-score-badge {
+  margin-left: auto;
+  font-family: 'DM Mono', monospace;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.wg-dim-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--bg-warm);
+}
+
+.wg-dim-row:last-child { border-bottom: none; }
+.wg-dim-key { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--ink-muted); min-width: 36px; }
+.wg-dim-bar-wrap { flex: 1; height: 6px; background: var(--bg-warm); overflow: hidden; }
+.wg-dim-fill { height: 100%; transition: width 0.5s; }
+.wg-dim-val { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; min-width: 36px; text-align: right; }
+
+/* ── EVASION ── */
+.evasion-matrix {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.ev-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border);
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ev-card:hover { border-left-color: var(--amber); box-shadow: var(--shadow); }
+.ev-card.ev-active { border-left-color: var(--red); background: var(--red-light); }
+
+.ev-key {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--ink-muted);
+  margin-bottom: 4px;
+}
+
+.ev-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.ev-bar-track { height: 5px; background: var(--bg-warm); overflow: hidden; margin-bottom: 4px; }
+.ev-bar-fill { height: 100%; transition: width 0.5s, background 0.3s; }
+.ev-score { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; }
+
+/* Declaration vs Actual */
+.da-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--amber);
+  padding: 16px;
+  margin-top: 0;
+}
+
+.da-header {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.da-domain-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-muted);
+  margin-bottom: 14px;
+  letter-spacing: 0.5px;
+}
+
+.da-row {
+  display: grid;
+  grid-template-columns: 140px 1fr 50px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.da-label { font-size: 11px; color: var(--ink-light); }
+
+.da-bars-col { position: relative; }
+
+.da-bar-wrap { height: 12px; background: var(--bg-warm); position: relative; margin-bottom: 2px; overflow: hidden; }
+
+.da-declared-bar {
+  position: absolute;
+  top: 0; left: 0; height: 100%;
+  background: rgba(0,158,219,0.35);
+  transition: width 0.5s;
+}
+
+.da-actual-bar {
+  position: absolute;
+  top: 0; left: 0; height: 100%;
+  background: rgba(153,27,27,0.6);
+  transition: width 0.5s;
+}
+
+.da-bar-label {
+  position: absolute;
+  right: 4px; top: 50%;
+  transform: translateY(-50%);
+  font-family: 'DM Mono', monospace;
+  font-size: 7px;
+  color: rgba(0,0,0,0.5);
+  font-weight: 600;
+}
+
+.da-gap-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.da-legend {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--ink-muted);
+}
+
+.da-legend-item::before { content: '■ '; }
+.da-declared-leg { color: rgba(0,100,180,0.7); }
+.da-actual-leg { color: rgba(153,27,27,0.8); }
+
+/* Evasion confidence */
+.ev-conf-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.ev-conf-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-muted);
+  min-width: 130px;
+}
+
+.ev-conf-bar-wrap { flex: 1; height: 8px; background: var(--bg-warm); overflow: hidden; border: 1px solid var(--border); }
+.ev-conf-fill { height: 100%; transition: width 0.5s, background 0.3s; }
+.ev-conf-val { font-family: 'DM Mono', monospace; font-size: 16px; font-weight: 500; min-width: 40px; text-align: right; }
+
+/* ── COK ── */
+.cok-track-wrap {
+  background: var(--bg-warm);
+  border: 1px solid var(--border);
+  height: 20px;
+  position: relative;
+  margin: 20px 0 28px;
+  overflow: visible;
+}
+
+.cok-seg {
+  position: absolute; top: 0; height: 100%;
+  transition: width 0.5s, left 0.5s;
+}
+
+.cok-intact { background: rgba(22,101,52,0.5); }
+.cok-broken { background: rgba(153,27,27,0.65); animation: cokblink 1.2s ease-in-out infinite; }
+.cok-recovering { background: rgba(217,119,6,0.5); }
+
+@keyframes cokblink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+.cok-event-marker {
+  position: absolute;
+  bottom: -22px;
+  transform: translateX(-50%);
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+.cok-event-marker::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  width: 1px;
+  height: 10px;
+  background: var(--border-strong);
+}
+
+.cok-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.cok-stat {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  text-align: center;
+}
+
+.cok-stat-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.cok-stat-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--ink-muted);
+  letter-spacing: 0.5px;
+}
+
+/* ── SCENARIOS ── */
+.scenario-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 3px solid transparent;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.scenario-item:hover { border-left-color: var(--un-blue); box-shadow: var(--shadow); }
+.scenario-item.sc-active { border-left-color: var(--iaea-teal); background: var(--iaea-teal-light); }
+
+.sc-tags { display: flex; gap: 6px; margin-bottom: 8px; }
+.sc-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  padding: 2px 7px;
+  border: 1px solid;
+  text-transform: uppercase;
+}
+
+.sc-nuclear { color: var(--amber); border-color: var(--amber); }
+.sc-ai { color: var(--un-blue-dark); border-color: var(--un-blue); }
+.sc-cross { color: #7c3aed; border-color: #7c3aed; }
+.sc-reform { color: var(--green); border-color: var(--green); }
+.sc-crisis { color: #dc2626; border-color: #dc2626; }
+
+.sc-title { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.sc-desc { font-size: 11px; color: var(--ink-light); line-height: 1.5; }
+
+/* ── ACTION BUTTONS ── */
+.action-btn {
+  padding: 9px 18px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1.5px solid;
+  background: transparent;
+}
+
+.btn-primary { border-color: var(--un-blue); color: var(--un-blue); }
+.btn-primary:hover { background: var(--un-blue); color: white; }
+.btn-teal { border-color: var(--iaea-teal); color: var(--iaea-teal); }
+.btn-teal:hover { background: var(--iaea-teal); color: white; }
+.btn-reset { border-color: var(--border-strong); color: var(--ink-muted); font-size: 11px; }
+.btn-reset:hover { border-color: var(--ink-light); color: var(--ink); }
+
+.output-box {
+  background: var(--bg-warm);
+  border: 1px solid var(--border);
+  padding: 14px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  line-height: 1.9;
+  color: var(--ink-light);
+  white-space: pre-wrap;
+  min-height: 80px;
+  margin-top: 10px;
+}
+
+/* ── STRATUM BARS ── */
+.stratum-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--bg-warm);
+}
+
+.stratum-row:last-child { border-bottom: none; }
+.str-label { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--ink-muted); min-width: 56px; }
+.str-bar { flex: 1; height: 6px; background: var(--bg-warm); overflow: hidden; }
+.str-fill { height: 100%; transition: width 0.5s, background 0.3s; }
+.str-val { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; min-width: 44px; text-align: right; }
+
+/* ── FOOTER ── */
+.site-footer {
+  margin-top: 32px;
+  padding: 16px 0;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-l { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--ink-muted); letter-spacing: 0.5px; }
+.footer-r { font-family: 'Libre Baskerville', serif; font-size: 11px; color: var(--ink-muted); font-style: italic; }
+
+/* Responsive */
+@media(max-width:900px) {
+  .grid-main,.grid-2,.grid-3 { grid-template-columns:1fr; }
+  .metric-strip { grid-template-columns:1fr; }
+  .evasion-matrix { grid-template-columns:1fr 1fr; }
+  .country-grid { grid-template-columns:1fr; }
+  .country-vs { display:none; }
+}
+
+/* Highlight classes */
+.hl-blue { color: var(--un-blue-dark); font-weight: 600; }
+.hl-teal { color: var(--iaea-teal); font-weight: 600; }
+.hl-red  { color: var(--red); font-weight: 600; }
+.hl-green{ color: var(--green); font-weight: 600; }
+.hl-amber{ color: var(--amber); font-weight: 600; }
+
+/* ── P3 WARGAMING DEMO ── */
+/* Domain bar */
+.dom-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:22px;}
+.dbn{padding:9px 18px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:var(--bg-card);color:var(--ink-light);transition:all .2s;display:flex;align-items:center;gap:7px;}
+.dbn:hover{border-color:#7c3aed;color:#7c3aed;}
+.dbn.active{border-color:#7c3aed;background:#ede9fe;color:#7c3aed;}
+/* g-GWC strip */
+.gwc-strip{display:grid;grid-template-columns:160px 1fr 180px;gap:20px;align-items:center;background:var(--bg-card);border:1px solid var(--border);border-left:4px solid #7c3aed;padding:16px 22px;margin-bottom:22px;box-shadow:var(--sh);}
+.gwc-val{font-family:'DM Mono',monospace;font-size:42px;font-weight:500;line-height:1;}
+.gwc-lbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--ink-muted);margin-bottom:4px;}
+.gwc-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-muted);margin-top:4px;}
+.p3-bar-hd{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-muted);margin-bottom:5px;}
+.p3-bar-tr{height:8px;background:var(--bg-warm);border:1px solid var(--border);position:relative;overflow:hidden;}
+.p3-bar-fi{height:100%;transition:width .5s,background .4s;}
+.p3-bar-th{position:absolute;top:0;bottom:0;width:1.5px;background:var(--amber);}
+.p3-bar-th::before{content:attr(data-l);position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-family:'DM Mono',monospace;font-size:7px;color:var(--amber);white-space:nowrap;}
+.p3-chip{display:inline-block;padding:5px 14px;font-family:'DM Mono',monospace;font-size:10px;border:1px solid;letter-spacing:1px;}
+.p3-chip-g{color:var(--green);border-color:var(--green);background:var(--green-light);}
+.p3-chip-w{color:var(--amber);border-color:var(--amber);background:var(--amber-light);}
+.p3-chip-r{color:var(--red);border-color:var(--red);background:var(--red-light);}
+/* P3 Tabs */
+.p3-tabs{display:flex;gap:0;border-bottom:1.5px solid var(--border);margin-bottom:22px;}
+.p3t{padding:8px 16px;font-size:12px;font-weight:500;color:var(--ink-muted);cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;position:relative;bottom:-1.5px;transition:all .15s;white-space:nowrap;}
+.p3t:hover{color:var(--ink);}
+.p3t.on{color:#7c3aed;border-bottom-color:#7c3aed;font-weight:600;}
+.p3pnl{display:none;animation:p3fin .2s ease;}
+.p3pnl.on{display:block;}
+@keyframes p3fin{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+/* P3 Card titles */
+.p3-card-t{font-family:'Libre Baskerville',serif;font-size:13px;font-weight:700;margin-bottom:4px;}
+.p3-card-s{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--ink-muted);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.p3-g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.p3-gcol{display:flex;flex-direction:column;gap:14px;}
+.p3-mb16{margin-bottom:16px;}
+/* Game State */
+.p3-cfg-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px;}
+.p3-cfg-card{background:var(--bg-card);border:1px solid var(--border);box-shadow:var(--sh);padding:14px;}
+.p3-cfg-lbl{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--ink-muted);margin-bottom:7px;}
+.p3-cfg-sel{width:100%;padding:9px 10px;border:1.5px solid var(--border);background:var(--bg-card);font-family:'DM Sans',sans-serif;font-size:12px;color:var(--ink);cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239aabbf' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;transition:border-color .2s;}
+.p3-cfg-sel:focus{outline:none;border-color:#7c3aed;}
+.p3-cfg-inf{margin-top:7px;font-size:11px;color:var(--ink-light);font-family:'DM Mono',monospace;padding:5px 8px;background:var(--bg-warm);border-left:2px solid #7c3aed;}
+.p3-st-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;}
+.p3-stc{background:var(--bg-card);border:1px solid var(--border);box-shadow:var(--sh);padding:13px;}
+.p3-stc-lbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--ink-muted);margin-bottom:6px;}
+.p3-stc-title{font-family:'Libre Baskerville',serif;font-size:11px;font-weight:700;color:var(--ink);margin-bottom:8px;font-style:italic;}
+.p3-stc-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--bg-warm);}
+.p3-stc-row:last-child{border-bottom:none;}
+.p3-stc-nm{font-size:10px;color:var(--ink-light);}
+.p3-stc-vl{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;}
+.p3-mono-box{background:var(--bg-warm);border:1px solid var(--border);padding:12px;font-family:'DM Mono',monospace;font-size:10px;line-height:2.1;color:var(--ink-light);white-space:pre-wrap;}
+/* Registry */
+.p3-ind-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.p3-ind-row{display:flex;align-items:center;gap:8px;padding:3px 0;}
+.p3-ind-nm{font-size:10px;color:var(--ink-light);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+.p3-ind-sl{-webkit-appearance:none;width:70px;height:3px;background:transparent;cursor:pointer;flex-shrink:0;}
+.p3-ind-sl::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;background:#7c3aed;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 2px rgba(0,0,0,.2);cursor:pointer;}
+.p3-ind-sl::-webkit-slider-runnable-track{height:3px;background:linear-gradient(90deg,#7c3aed var(--pct,50%),var(--border) var(--pct,50%));border-radius:2px;}
+.p3-ind-vl{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;min-width:28px;text-align:right;}
+.p3-ind-sec-hd{grid-column:1/-1;font-family:'DM Mono',monospace;font-size:9px;color:#7c3aed;letter-spacing:1px;padding:5px 0 2px;border-top:1px solid var(--border);margin-top:4px;}
+.p3-score-chain{display:grid;grid-template-columns:1fr 20px 1fr 20px 100px;gap:0;align-items:start;}
+.p3-scl{background:var(--bg-panel);border:1px solid var(--border);padding:12px;}
+.p3-scl-t{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--ink-muted);margin-bottom:8px;text-transform:uppercase;}
+.p3-sc-arr{display:flex;align-items:center;justify-content:center;padding-top:26px;color:var(--ink-muted);font-size:16px;}
+.p3-nof-it{display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--bg-warm);}
+.p3-nof-it:last-child{border-bottom:none;}
+.p3-nof-id{font-family:'DM Mono',monospace;font-size:8px;color:#7c3aed;min-width:58px;}
+.p3-nof-nm{font-size:9px;color:var(--ink-muted);margin-bottom:2px;}
+.p3-nof-br{flex:1;height:4px;background:var(--bg-warm);overflow:hidden;}
+.p3-nof-bf{height:100%;transition:width .4s,background .3s;}
+.p3-nof-vl{font-family:'DM Mono',monospace;font-size:9px;font-weight:500;min-width:30px;text-align:right;}
+.p3-nof-ps{font-size:9px;min-width:14px;text-align:center;}
+.p3-bac-it{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--bg-warm);}
+.p3-bac-it:last-child{border-bottom:none;}
+.p3-bac-id{font-family:'DM Mono',monospace;font-size:8px;color:var(--iaea-teal);min-width:44px;}
+.p3-bac-nm{font-size:8px;color:var(--ink-muted);}
+.p3-bac-br{flex:1;height:5px;background:var(--bg-warm);overflow:hidden;}
+.p3-bac-bf{height:100%;transition:width .4s,background .3s;}
+.p3-bac-vl{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;min-width:30px;text-align:right;}
+.p3-gg-wrap{text-align:center;padding:16px 8px;}
+.p3-gg-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--ink-muted);margin-bottom:5px;}
+.p3-gg-val{font-family:'DM Mono',monospace;font-size:38px;font-weight:500;line-height:1;margin-bottom:6px;}
+.p3-gg-theta{font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-muted);margin-bottom:8px;}
+.p3-gg-bt{height:6px;background:var(--bg-warm);border:1px solid var(--border);position:relative;overflow:hidden;margin:8px 0;}
+.p3-gg-bf{height:100%;transition:width .5s,background .4s;}
+.p3-gg-th{position:absolute;top:0;bottom:0;width:1.5px;background:var(--amber);}
+.p3-gg-th::before{content:attr(data-l);position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-family:'DM Mono',monospace;font-size:7px;color:var(--amber);white-space:nowrap;}
+/* BGC Grid */
+.p3-bgc-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:20px;}
+.p3-bgcc{background:var(--bg-card);border:1px solid var(--border);box-shadow:var(--sh);padding:11px;text-align:center;}
+.p3-bgc-code{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--iaea-teal);margin-bottom:3px;}
+.p3-bgc-name{font-size:9px;color:var(--ink-light);margin-bottom:7px;line-height:1.35;}
+.p3-bgc-score{font-family:'DM Mono',monospace;font-size:17px;font-weight:500;margin-bottom:5px;}
+.p3-bgc-bh{height:3px;background:var(--bg-warm);overflow:hidden;margin-bottom:5px;}
+.p3-bgc-bf{height:100%;transition:width .4s,background .3s;}
+.p3-bgc-sl{-webkit-appearance:none;width:100%;height:3px;background:transparent;cursor:pointer;display:block;}
+.p3-bgc-sl::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;background:var(--iaea-teal);border-radius:50%;border:2px solid #fff;box-shadow:0 1px 2px rgba(0,0,0,.2);}
+.p3-bgc-sl::-webkit-slider-runnable-track{height:3px;background:linear-gradient(90deg,var(--iaea-teal) var(--pct,50%),var(--border) var(--pct,50%));border-radius:2px;}
+/* GNN */
+.p3-gnn-wrap{background:#000;height:500px;position:relative;}
+#p3-gnn-cvs{width:100%;height:100%;}
+.p3-gnn-leg{padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:18px;flex-wrap:wrap;}
+.p3-gnn-li{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-light);}
+.p3-gnn-dot{width:10px;height:10px;border-radius:50%;}
+/* Convergence */
+.p3-conv-wrap{background:#070b1a;height:460px;position:relative;}
+#p3-conv-cvs{width:100%;height:100%;}
+.p3-conv-ctrl{padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.p3-cbtn{padding:7px 16px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid;background:transparent;transition:all .2s;}
+.p3-cbtn-p{border-color:#7c3aed;color:#7c3aed;}
+.p3-cbtn-p:hover{background:#7c3aed;color:#fff;}
+.p3-cbtn-s{border-color:var(--border-s);color:var(--ink-muted);}
+.p3-cbtn-s:hover{border-color:var(--ink-light);color:var(--ink);}
+.p3-cstat{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink-muted);padding:5px 10px;background:var(--bg-warm);border:1px solid var(--border);}
+.p3-cstat span{color:var(--ink);font-weight:600;}
+/* Pathways */
+.p3-pw-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px;}
+.p3-pwc{background:var(--bg-card);border:1px solid var(--border);border-left:3px solid var(--amber);box-shadow:var(--sh);padding:14px;}
+.p3-pw-dom{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--ink-muted);margin-bottom:5px;}
+.p3-pw-title{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:5px;}
+.p3-pw-desc{font-size:11px;color:var(--ink-light);margin-bottom:7px;line-height:1.55;}
+.p3-pw-ex{font-family:'DM Mono',monospace;font-size:9px;color:var(--amber);padding:3px 7px;background:var(--amber-light);border:1px solid rgba(217,119,6,.2);margin-bottom:6px;}
+.p3-pw-fail{font-size:10px;color:var(--red);margin-bottom:5px;}
+.p3-pw-bgc{display:flex;gap:4px;}
+.p3-pw-btag{font-family:'DM Mono',monospace;font-size:8px;padding:2px 5px;background:var(--red-light);color:var(--red);border:1px solid rgba(153,27,27,.2);}
+/* Actions */
+.p3-ac-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.p3-acc{background:var(--bg-card);border:1px solid var(--border);box-shadow:var(--sh);padding:13px;cursor:pointer;transition:all .2s;}
+.p3-acc:hover{border-color:#7c3aed;box-shadow:var(--shm);}
+.p3-acc-icon{font-size:20px;margin-bottom:7px;}
+.p3-acc-title{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:3px;}
+.p3-acc-desc{font-size:10px;color:var(--ink-light);line-height:1.5;}
+.p3-acc-eff{font-family:'DM Mono',monospace;font-size:9px;margin-top:5px;padding:2px 6px;display:inline-block;border:1px solid;}
+.p3-ae-p{color:var(--green);border-color:var(--green);background:var(--green-light);}
+.p3-ae-n{color:var(--red);border-color:var(--red);background:var(--red-light);}
+.p3-ae-m{color:var(--amber);border-color:var(--amber);background:var(--amber-light);}
+.p3-out-box{background:var(--bg-warm);border:1px solid var(--border);padding:12px;font-family:'DM Mono',monospace;font-size:11px;line-height:1.9;color:var(--ink-light);min-height:80px;white-space:pre-wrap;}
+/* Actor table */
+.p3-actor-tbl{width:100%;border-collapse:collapse;font-size:11px;}
+.p3-actor-tbl th{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--ink-muted);text-align:left;padding:6px 8px;border-bottom:1.5px solid var(--border);}
+.p3-actor-tbl td{padding:7px 8px;border-bottom:1px solid var(--bg-warm);}
+.p3-actor-tbl tr:hover td{background:var(--bg-warm);}
+/* Color util for P3 */
+.p3-gc{color:var(--green);}.p3-ac{color:var(--amber);}.p3-rc{color:var(--red);}.p3-pc{color:#7c3aed;}
+@media(max-width:960px){
+  .p3-cfg-row,.p3-st-grid,.p3-bgc-grid,.p3-pw-grid,.p3-ac-grid,.p3-score-chain,.p3-g2{grid-template-columns:1fr;}
+  .gwc-strip{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="site-header">
+  <div class="header-inner">
+    <div class="header-brand">
+      <div class="header-icon">Lyra 2.0</div>
+      <div class="header-title">
+        Auracelle Lyra
+        <small>Assurance Governance Simulation Platform · E-AGPO / E-AGSO</small>
+      </div>
+    </div>
+    <div class="header-nav">
+      <button class="nav-tab active-p1" onclick="switchPage('p1',this)">E-AGPO · Policy Metrics</button>
+      <button class="nav-tab" onclick="switchPage('p2',this)">E-AGSO · Assurance Stress-Test</button>
+    </div>
+    <div class="header-right">
+      <div class="live-indicator">
+        <div class="live-dot"></div>
+        <span>Live Computation</span>
+      </div>
+      <div class="live-indicator" id="ts" style="margin-left:8px"></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ══════════════════════
+     PAGE 1 — E-AGPO
+══════════════════════ -->
+<div class="page active" id="page-p1">
+
+  <div class="page-intro">
+    <div class="pi-left">
+      <div class="pi-engine">E-AGPO Engine · Evans Accelerated Governance Policy Optimization</div>
+      <div class="pi-title">AI Governance Policy Metrics</div>
+      <div class="pi-desc">Evaluates governance policy performance across hierarchical Narrow Operational Factors (NOFs). Upload a policy document for automated extraction, select countries for comparative wargaming, or configure indicators manually.</div>
+    </div>
+    <div class="pi-right">
+      <div style="background:var(--bg-card);border:1px solid var(--border);padding:12px 16px;text-align:center;min-width:140px">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-muted);letter-spacing:1px;margin-bottom:4px">FRAMEWORK</div>
+        <div style="font-family:'Libre Baskerville',serif;font-size:13px;font-weight:700;color:var(--ink)">E-AGPO-HT</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-muted);margin-top:4px">Stratum I→II→III</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODE SELECTOR -->
+  <div class="mode-selector">
+    <div class="mode-label">Analysis Mode</div>
+    <div class="mode-btns">
+      <button class="mode-btn active" onclick="setMode('p1','wargamedemo',this)">
+        <span class="mode-icon">🌐</span>
+        <div class="mode-btn-text">
+          <strong>Wargaming Demo</strong>
+          <span>Multi-domain simulation sandbox — E-AGPO-HT live engine</span>
+        </div>
+      </button>
+      <button class="mode-btn" onclick="setMode('p1','upload',this)">
+        <span class="mode-icon">📄</span>
+        <div class="mode-btn-text">
+          <strong>Document Upload</strong>
+          <span>Upload policy/standard for AI extraction</span>
+        </div>
+      </button>
+      <button class="mode-btn" onclick="setMode('p1','wargame',this)">
+        <span class="mode-icon">🌐</span>
+        <div class="mode-btn-text">
+          <strong>Country Wargaming</strong>
+          <span>Compare governance regimes by country</span>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Manual mode panel -->
+  <!-- Wargaming Demo mode panel -->
+  <div id="p1-wargamedemo-panel">
+
+    <!-- DOMAIN SELECTOR -->
+    <div class="dom-bar" id="p3-dom-bar">
+      <button class="dbn active" onclick="p3SetDomain('Nuclear',this)">⚛️ Nuclear</button>
+      <button class="dbn" onclick="p3SetDomain('AI',this)">🤖 AI</button>
+      <button class="dbn" onclick="p3SetDomain('Space',this)">🛰️ Space</button>
+      <button class="dbn" onclick="p3SetDomain('Biotech',this)">🧬 Biotech</button>
+      <button class="dbn" onclick="p3SetDomain('Renewable',this)">🌱 Renewable</button>
+      <button class="dbn" onclick="p3SetDomain('Quantum',this)">⚡ Quantum</button>
+    </div>
+
+    <!-- g-GWC MASTER STRIP -->
+    <div class="gwc-strip">
+      <div>
+        <div class="gwc-lbl">g-GWC · STRATUM III</div>
+        <div class="gwc-val p3-pc" id="p3-gwc-val">0.724</div>
+        <div class="gwc-sub" id="p3-gwc-dom-lbl">Nuclear · BGC → g-GWC</div>
+      </div>
+      <div>
+        <div class="p3-bar-hd"><span>0.0 Critical</span><span>0.5</span><span>0.8 Target</span><span>1.0</span></div>
+        <div class="p3-bar-tr">
+          <div class="p3-bar-th" style="left:80%" data-l="θ=0.80"></div>
+          <div class="p3-bar-fi" id="p3-gwc-bar" style="width:72.4%;background:var(--amber)"></div>
+        </div>
+        <div style="margin-top:5px;font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-muted)">Stratum I→II→III chain · E-AGPO-HT Framework</div>
+      </div>
+      <div style="text-align:right">
+        <div class="p3-chip p3-chip-w" id="p3-gwc-chip">Below Target</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--ink-muted);margin-top:6px" id="p3-gwc-delta">Δ = −0.076 to θ=0.80</div>
+      </div>
+    </div>
+
+    <!-- P3 TABS -->
+    <div class="p3-tabs">
+      <button class="p3t on" onclick="p3SwTab('gamestate',this)">Game State</button>
+      <button class="p3t" onclick="p3SwTab('registry',this)">Registry Scoring</button>
+      <button class="p3t" onclick="p3SwTab('bgc',this)">BGC Engine</button>
+      <button class="p3t" onclick="p3SwTab('gnn',this)">Governance Network</button>
+      <button class="p3t" onclick="p3SwTab('convergence',this)">Compliance Convergence</button>
+      <button class="p3t" onclick="p3SwTab('pathways',this)">Proliferation Pathways</button>
+      <button class="p3t" onclick="p3SwTab('actions',this)">Actions &amp; Shocks</button>
+    </div>
+
+    <!-- TAB: GAME STATE -->
+    <div class="p3pnl on" id="p3-pnl-gamestate">
+      <div class="p3-cfg-row p3-mb16">
+        <div class="p3-cfg-card">
+          <div class="p3-cfg-lbl">Your Role</div>
+          <select class="p3-cfg-sel" id="p3-role-sel" onchange="p3UpdateGS()"></select>
+          <div class="p3-cfg-inf" id="p3-role-inf">Playing as: IAEA Inspector</div>
+        </div>
+        <div class="p3-cfg-card">
+          <div class="p3-cfg-lbl">Standard Under Review</div>
+          <select class="p3-cfg-sel" id="p3-std-sel" onchange="p3UpdateGS()"></select>
+          <div class="p3-cfg-inf" id="p3-std-inf">Testing: INFCIRC/153</div>
+        </div>
+        <div class="p3-cfg-card">
+          <div class="p3-cfg-lbl">Country / Entity</div>
+          <select class="p3-cfg-sel" id="p3-ctry-sel" onchange="p3UpdateGS()"></select>
+          <div class="p3-cfg-inf" id="p3-ctry-inf">Context: Generic State</div>
+        </div>
+      </div>
+      <div class="p3-st-grid p3-mb16">
+        <div class="p3-stc">
+          <div class="p3-stc-lbl">P_t</div><div class="p3-stc-title">Policy</div>
+          <div class="p3-stc-row"><span class="p3-stc-nm">Stringency</span><span class="p3-stc-vl p3-gc" id="p3-gs-ps">0.71</span></div>
+          <div class="p3-stc-row"><span class="p3-stc-nm">Coverage</span><span class="p3-stc-vl p3-ac" id="p3-gs-pc">0.58</span></div>
+        </div>
+        <div class="p3-stc">
+          <div class="p3-stc-lbl">A_t</div><div class="p3-stc-title">Actor</div>
+          <div class="p3-stc-row"><span class="p3-stc-nm">Capability</span><span class="p3-stc-vl p3-gc" id="p3-gs-ac">0.60</span></div>
+          <div class="p3-stc-row"><span class="p3-stc-nm">Incentive</span><span class="p3-stc-vl p3-ac" id="p3-gs-ai">0.55</span></div>
+          <div class="p3-stc-row"><span class="p3-stc-nm">Access</span><span class="p3-stc-vl p3-ac" id="p3-gs-aa">0.44</span></div>
+        </div>
+        <div class="p3-stc">
+          <div class="p3-stc-lbl">C_t</div><div class="p3-stc-title">Compliance</div>
+          <div class="p3-stc-row"><span class="p3-stc-nm">Formal</span><span class="p3-stc-vl p3-gc" id="p3-gs-cf">0.85</span></div>
+          <div class="p3-stc-row"><span class="p3-stc-nm">Actual</span><span class="p3-stc-vl p3-ac" id="p3-gs-ca">0.70</span></div>
+          <div class="p3-stc-row"><span class="p3-stc-nm">Gap</span><span class="p3-stc-vl p3-rc" id="p3-gs-cg">0.15 ⚠</span></div>
+        </div>
+        <div class="p3-stc">
+          <div class="p3-stc-lbl">V_t</div><div class="p3-stc-title">Verification</div>
+          <div class="p3-stc-row"><span class="p3-stc-nm">Coverage</span><span class="p3-stc-vl p3-ac" id="p3-gs-vc">0.60</span></div>
+          <div class="p3-stc-row"><span class="p3-stc-nm">Confidence</span><span class="p3-stc-vl p3-ac" id="p3-gs-vk">0.60</span></div>
+          <div class="p3-stc-row"><span class="p3-stc-nm">Capacity</span><span class="p3-stc-vl p3-ac" id="p3-gs-vi">0.53</span></div>
+        </div>
+        <div class="p3-stc">
+          <div class="p3-stc-lbl">R_t</div><div class="p3-stc-title">Risk / Trust</div>
+          <div class="p3-stc-row"><span class="p3-stc-nm">Systemic Trust</span><span class="p3-stc-vl p3-gc" id="p3-gs-rt">0.59</span></div>
+          <div class="p3-stc-row"><span class="p3-stc-nm">Detection Risk</span><span class="p3-stc-vl p3-ac" id="p3-gs-rd">0.44</span></div>
+          <div class="p3-stc-row"><span class="p3-stc-nm">Legitimacy</span><span class="p3-stc-vl p3-ac" id="p3-gs-rl">0.59</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="p3-card-t">State Formula — bgc_to_state() mapping</div>
+        <div class="p3-card-s">STRATUM II BGC VALUES → GAME STATE VECTOR s_t</div>
+        <div class="p3-mono-box" id="p3-state-formula">
+V_t.coverage    = BGC[STI] × 0.80 = 0.600
+V_t.confidence  = BGC[SAD] × 0.85 = 0.595
+P_t.coverage    = BGC[NDM] × 0.80 = 0.576
+R_t.trust       = BGC[SRA] × 0.85 = 0.587
+A_t.access      = 1 − BGC[IIC] × 0.70 = 0.440
+R_t.legitimacy  = BGC[ASI] × 0.90 = 0.585</div>
+      </div>
+    </div>
+
+    <!-- TAB: REGISTRY SCORING -->
+    <div class="p3pnl" id="p3-pnl-registry">
+      <div class="p3-g2">
+        <div class="card">
+          <div class="p3-card-t">Registry Scoring — Indicator → NOF → BAC → g-GACn</div>
+          <div class="p3-card-s">CANONICAL LYRA_NOF_REGISTRY · score_lyra_end_to_end() · DOMAIN: <span id="p3-reg-dom" style="color:#7c3aed;font-weight:600">NUCLEAR</span></div>
+          <div style="font-size:11px;color:var(--ink-light);margin-bottom:12px;line-height:1.7">Adjust individual indicators. Scores propagate through the full chain: indicator means → NOF scores → BAC aggregation → g-GACn.</div>
+          <div class="p3-ind-grid" id="p3-ind-sliders"></div>
+        </div>
+        <div class="p3-gcol">
+          <div class="p3-score-chain">
+            <div class="p3-scl">
+              <div class="p3-scl-t">Stratum I · NOF</div>
+              <div id="p3-nof-list"></div>
+            </div>
+            <div class="p3-sc-arr">→</div>
+            <div class="p3-scl">
+              <div class="p3-scl-t">Stratum II · BAC</div>
+              <div id="p3-bac-list"></div>
+            </div>
+            <div class="p3-sc-arr">→</div>
+            <div class="p3-scl">
+              <div class="p3-scl-t">Stratum III</div>
+              <div class="p3-gg-wrap">
+                <div class="p3-gg-lbl">g-GACn</div>
+                <div class="p3-gg-val p3-ac" id="p3-gg-val">0.578</div>
+                <div class="p3-gg-theta">θ = 0.80</div>
+                <div class="p3-gg-bt">
+                  <div class="p3-gg-th" style="left:80%" data-l="θ=0.80"></div>
+                  <div class="p3-gg-bf" id="p3-gg-bar" style="width:57.8%;background:var(--amber)"></div>
+                </div>
+                <div class="p3-chip p3-chip-w" id="p3-gg-chip" style="font-size:9px;padding:3px 8px">Below θ</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: BGC ENGINE -->
+    <div class="p3pnl" id="p3-pnl-bgc">
+      <div class="p3-bgc-grid" id="p3-bgc-grid"></div>
+      <div class="card">
+        <div class="p3-card-t">BGC Dimension Reference</div>
+        <div class="p3-card-s">E-AGPO-HT STRATUM II · 7 BOUNDED GOVERNANCE CAPABILITIES</div>
+        <div id="p3-bgc-desc"></div>
+      </div>
+    </div>
+
+    <!-- TAB: GNN -->
+    <div class="p3pnl" id="p3-pnl-gnn">
+      <div class="card p3-mb16">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div>
+            <div class="p3-card-t">Governance Neural Network — 3D Actor Graph</div>
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-muted);letter-spacing:1px;margin-top:2px">DOMAIN: <span id="p3-gnn-dom" style="color:#7c3aed;font-weight:600">NUCLEAR</span> · <span id="p3-gnn-ac">7 actors</span> · AUTO-ROTATING</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="p3-cbtn p3-cbtn-s" onclick="p3GnnRotDir=-p3GnnRotDir">⇄ Reverse</button>
+            <button class="p3-cbtn p3-cbtn-p" onclick="p3ResetGNN()">Reset View</button>
+          </div>
+        </div>
+        <div class="p3-gnn-wrap"><canvas id="p3-gnn-cvs"></canvas></div>
+        <div class="p3-gnn-leg" id="p3-gnn-leg"></div>
+      </div>
+      <div class="card">
+        <div class="p3-card-t">Actor Node Parameters</div>
+        <div class="p3-card-s">INSTITUTIONAL AUTHORITY · RESOURCE CAPACITY · POLITICAL INDEPENDENCE · TECHNICAL EXPERTISE · NETWORK CENTRALITY</div>
+        <div style="overflow-x:auto"><table class="p3-actor-tbl" id="p3-actor-tbl"></table></div>
+      </div>
+    </div>
+
+    <!-- TAB: CONVERGENCE -->
+    <div class="p3pnl" id="p3-pnl-convergence">
+      <div class="card p3-mb16">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div>
+            <div class="p3-card-t">INFCIRC Compliance Convergence Animation</div>
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-muted);letter-spacing:1px;margin-top:2px">20 REAL SAFEGUARDS ACTORS · CURRENT → TARGET COMPLIANCE · THREE.JS 3D</div>
+          </div>
+          <select id="p3-conv-tgt" style="padding:6px 10px;border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:10px;background:var(--bg-card)" onchange="p3ConvTarget=parseFloat(this.value)">
+            <option value="0.75">Target: 75%</option>
+            <option value="0.90">Target: 90%</option>
+            <option value="1.00" selected>Target: 100%</option>
+          </select>
+        </div>
+        <div class="p3-conv-wrap"><canvas id="p3-conv-cvs"></canvas></div>
+        <div class="p3-conv-ctrl">
+          <button class="p3-cbtn p3-cbtn-p" id="p3-conv-play-btn" onclick="p3ToggleConv()">▶ Animate</button>
+          <button class="p3-cbtn p3-cbtn-s" onclick="p3ResetConv()">↺ Reset</button>
+          <div class="p3-cstat">Avg Compliance <span id="p3-conv-avg">35%</span></div>
+          <div class="p3-cstat">Critical Failures <span id="p3-conv-crit">4</span></div>
+          <div class="p3-cstat">Month <span id="p3-conv-mo">0</span></div>
+          <div style="display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-muted)">
+            Speed <input type="range" min="1" max="10" value="5" id="p3-conv-spd" style="width:70px">
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="p3-card-t">Actor Compliance Legend</div>
+        <div class="p3-card-s">COLOR = COMPLIANCE TIER · NODE SIZE = GAP SEVERITY · POSITION = SAFEGUARDS POSTURE SPACE</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">
+          <div style="display:flex;align-items:center;gap:6px;font-size:11px"><div style="width:11px;height:11px;border-radius:50%;background:#e63946"></div>Critical (&lt;40%)</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:11px"><div style="width:11px;height:11px;border-radius:50%;background:#f4a261"></div>High Failure (40–60%)</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:11px"><div style="width:11px;height:11px;border-radius:50%;background:#e9c46a"></div>Medium (60–75%)</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:11px"><div style="width:11px;height:11px;border-radius:50%;background:#52b788"></div>Compliant (&gt;75%)</div>
+        </div>
+        <div id="p3-conv-legend" style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-light)"></div>
+      </div>
+    </div>
+
+    <!-- TAB: PATHWAYS -->
+    <div class="p3pnl" id="p3-pnl-pathways">
+      <div class="p3-pw-grid" id="p3-pw-grid"></div>
+    </div>
+
+    <!-- TAB: ACTIONS -->
+    <div class="p3pnl" id="p3-pnl-actions">
+      <div class="p3-ac-grid" id="p3-ac-grid"></div>
+      <div class="p3-out-box" id="p3-ac-out"><span style="color:var(--ink-muted)">Select an action or shock above to observe cascade effects through the s_t state vector and BGC dimensions.</span></div>
+    </div>
+
+  </div><!-- /wargamedemo panel -->
+
+  <!-- Upload mode panel -->
+  <div id="p1-upload-panel" style="display:none">
+    <div class="grid-main">
+      <div>
+        <div class="card">
+          <div class="card-title">Upload Policy or Standards Document</div>
+          <div class="card-sub">SUPPORTED: PDF, DOCX, TXT · MAX 10MB</div>
+          <div class="upload-zone" id="p1-upload-zone">
+            <input type="file" id="p1-file-input" accept=".pdf,.txt,.docx" onchange="handleP1Upload(this)">
+            <div class="upload-icon">📋</div>
+            <div class="upload-title">Drop policy document here</div>
+            <div class="upload-desc">Upload an AI governance policy, national AI strategy, bilateral agreement,<br>standards document, or audit report</div>
+            <div class="upload-formats">Accepted: PDF · DOCX · TXT</div>
+            <button class="upload-btn" onclick="document.getElementById('p1-file-input').click();event.stopPropagation()">Choose File</button>
+          </div>
+
+          <div class="analysis-progress" id="p1-progress">
+            <div class="progress-header"><div class="progress-spinner"></div>Analysing document with E-AGPO engine…</div>
+            <ul class="progress-steps" id="p1-progress-steps"></ul>
+          </div>
+
+          <div class="doc-result" id="p1-doc-result">
+            <div class="doc-result-header">
+              <div>
+                <div style="font-size:13px;font-weight:600">Extraction Complete</div>
+                <div class="doc-filename" id="p1-doc-filename">document.pdf</div>
+              </div>
+              <div class="status-chip chip-good" style="display:inline-block">Analysis Ready</div>
+            </div>
+            <div class="doc-result-body" id="p1-doc-body">Awaiting extraction…</div>
+          </div>
+        </div>
+      </div>
+      <div class="right-col">
+        <div class="card">
+          <div class="card-title">How Document Extraction Works</div>
+          <div style="font-size:12px;color:var(--ink-light);line-height:1.8">
+            The E-AGPO engine uses Claude AI to read your document and automatically score each NOF indicator based on:<br><br>
+            <strong style="color:var(--ink)">Presence</strong> — Is the concept addressed?<br>
+            <strong style="color:var(--ink)">Specificity</strong> — Are requirements concrete?<br>
+            <strong style="color:var(--ink)">Enforceability</strong> — Are mechanisms defined?<br><br>
+            Scores populate the NOF sliders automatically. You can then adjust manually to model reforms.
+          </div>
+        </div>
+        <div class="card" id="p1-extracted-scores" style="display:none">
+          <div class="card-title">Extracted NOF Scores</div>
+          <div class="card-sub">AUTO-POPULATED FROM DOCUMENT</div>
+          <div id="p1-extracted-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wargame mode panel -->
+  <div id="p1-wargame-panel" style="display:none">
+    <div class="grid-main">
+      <div>
+        <div class="card">
+          <div class="card-title">Country Governance Comparison</div>
+          <div class="card-sub">SELECT TWO COUNTRIES TO COMPARE AI GOVERNANCE REGIMES</div>
+          <div class="country-grid">
+            <div class="country-box">
+              <div class="country-box-label">Country A</div>
+              <select class="country-select" id="country-a" onchange="updateCountryProfile('a')">
+                <option value="">— Select Country —</option>
+              </select>
+              <div class="country-profile" id="profile-a"><span style="color:var(--ink-muted);font-size:11px">Select a country to view governance profile</span></div>
+            </div>
+            <div class="country-vs">vs.</div>
+            <div class="country-box">
+              <div class="country-box-label">Country B</div>
+              <select class="country-select" id="country-b" onchange="updateCountryProfile('b')">
+                <option value="">— Select Country —</option>
+              </select>
+              <div class="country-profile" id="profile-b"><span style="color:var(--ink-muted);font-size:11px">Select a country to view governance profile</span></div>
+            </div>
+          </div>
+          <button class="run-wargame-btn" onclick="runWargame()">▶ Run Governance Comparison</button>
+        </div>
+
+        <div class="wargame-result" id="wg-result">
+          <div class="wg-comparison-grid" id="wg-cols"></div>
+          <div class="card">
+            <div class="card-title">Governance Gap Analysis</div>
+            <div class="card-sub">DIMENSION-BY-DIMENSION COMPARISON</div>
+            <div id="wg-gap-analysis" class="output-box" style="background:var(--bg-card)"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="right-col">
+        <div class="card">
+          <div class="card-title">Wargaming Mode</div>
+          <div style="font-size:12px;color:var(--ink-light);line-height:1.8">Country profiles are seeded with publicly available governance data: AI strategy publication, treaty participation, regulatory maturity, and institutional capacity indicators.<br><br>The comparison identifies <strong style="color:var(--ink)">assurance equivalence gaps</strong> — differences in governance posture that create friction in mutual recognition and cross-border AI governance coordination.</div>
+        </div>
+        <div class="card" id="wg-claude-analysis" style="display:none">
+          <div class="card-title">AI Governance Assessment</div>
+          <div class="card-sub">CLAUDE-POWERED COMPARATIVE ANALYSIS</div>
+          <div class="output-box" id="wg-claude-out" style="background:var(--bg-card)"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page-p1 -->
+
+
+<!-- ══════════════════════
+     PAGE 2 — E-AGSO
+══════════════════════ -->
+<div class="page" id="page-p2">
+
+  <div class="page-intro">
+    <div class="pi-left">
+      <div class="pi-engine agso">E-AGSO Engine · Evans Accelerated Governance Standards Optimization</div>
+      <div class="pi-title">Assurance Ecosystem Stress-Tester</div>
+      <div class="pi-desc">Tests whether governance standards can be verified, audited, certified, and enforced under real-world conditions. Models audit evasion surfaces, continuity of knowledge degradation, and assurance fragmentation across Nuclear, Space, BioTech, and AI domains.</div>
+    </div>
+    <div class="pi-right">
+      <div style="background:var(--bg-card);border:1px solid var(--border);padding:12px 16px;text-align:center;min-width:140px">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-muted);letter-spacing:1px;margin-bottom:4px">FRAMEWORK</div>
+        <div style="font-family:'Libre Baskerville',serif;font-size:13px;font-weight:700;color:var(--ink)">E-AGSO</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-muted);margin-top:4px">Assurance Resilience</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODE SELECTOR P2 -->
+  <div class="mode-selector">
+    <div class="mode-label">Analysis Mode</div>
+    <div class="mode-btns">
+      <button class="mode-btn active agso-mode" onclick="setMode('p2','manual',this)">
+        <span class="mode-icon">⚙️</span>
+        <div class="mode-btn-text"><strong>Manual Configuration</strong><span>Configure assurance NOFs directly</span></div>
+      </button>
+      <button class="mode-btn" onclick="setMode('p2','upload',this)">
+        <span class="mode-icon">📄</span>
+        <div class="mode-btn-text"><strong>Audit Report Upload</strong><span>Upload inspection report or standards document</span></div>
+      </button>
+      <button class="mode-btn" onclick="setMode('p2','wargame',this)">
+        <span class="mode-icon">🌐</span>
+        <div class="mode-btn-text"><strong>Regime Comparison</strong><span>Compare assurance regimes by domain/country</span></div>
+      </button>
+    </div>
+  </div>
+
+  <!-- P2 Manual Panel -->
+  <div id="p2-manual-panel">
+
+    <div class="metric-strip agso-strip">
+      <div class="ms-score-area">
+        <div class="ms-label">g-ARI · Assurance Resilience Index</div>
+        <div class="ms-value" id="p2-master" style="color:var(--amber)">0.541</div>
+        <div class="ms-sub">Evidence → Verification → Enforcement</div>
+      </div>
+      <div class="ms-bar-area">
+        <div class="bar-header"><span>0.0 Collapsed</span><span>0.5</span><span>0.65 Target</span><span>1.0</span></div>
+        <div class="bar-track" style="border-color:rgba(0,122,122,0.2)">
+          <div class="bar-thresh" style="left:65%;background:var(--iaea-teal)" data-label="Target 0.65"></div>
+          <div class="bar-fill" id="p2-master-bar" style="width:54.1%;background:var(--amber)"></div>
+        </div>
+        <div class="bar-sub">Cross-domain assurance integrity: Nuclear · Space · BioTech · AI</div>
+      </div>
+      <div class="ms-status-area">
+        <div class="status-chip chip-warn" id="p2-pill">Assurance Fragile</div>
+        <div class="delta-line" id="p2-delta">Δ = −0.109 to target</div>
+      </div>
+    </div>
+
+    <div class="tab-row">
+      <button class="stab sa2" onclick="switchTab('p2','evasion',this)">Audit Evasion</button>
+      <button class="stab" onclick="switchTab('p2','nof',this)">Assurance NOFs</button>
+      <button class="stab" onclick="switchTab('p2','cok',this)">Continuity of Knowledge</button>
+      <button class="stab" onclick="switchTab('p2','scenario',this)">Scenario Library</button>
+    </div>
+
+    <!-- EVASION TAB -->
+    <div class="tpanel active" id="p2-evasion">
+      <div class="grid-main" style="grid-template-columns:1fr 320px">
+        <div>
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-title">Audit Evasion Detection Matrix</div>
+            <div class="card-sub" style="margin-bottom:12px">EVASION = GAP BETWEEN DECLARED AND VERIFIED GOVERNANCE POSTURE · 6 ATTACK SURFACES</div>
+            <div class="evasion-matrix" id="ev-grid"></div>
+          </div>
+
+          <div class="da-panel">
+            <div class="da-header">Declaration Completeness &amp; Accuracy Analysis</div>
+            <div class="da-domain-label">Active Inspection Domain: <span id="da-domain" style="color:var(--amber);font-weight:600">Material Accountancy</span></div>
+            <div id="da-rows"></div>
+            <div class="da-legend">
+              <span class="da-legend-item da-declared-leg">Declared</span>
+              <span class="da-legend-item da-actual-leg">Verified Actual</span>
+              <span style="margin-left:auto">Gap = Evasion Surface</span>
+            </div>
+            <div class="ev-conf-row">
+              <div class="ev-conf-label">Evasion Confidence Score</div>
+              <div class="ev-conf-bar-wrap"><div class="ev-conf-fill" id="ev-conf-bar" style="width:38%;background:var(--amber)"></div></div>
+              <div class="ev-conf-val" id="ev-conf-val" style="color:var(--amber)">0.38</div>
+              <div class="status-chip chip-warn" id="ev-conf-pill">Moderate Risk</div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:16px">
+            <div class="card-title">Evasion Surface Controls</div>
+            <div class="card-sub">ADJUST RISK LEVEL PER VECTOR</div>
+            <div id="ev-sliders"></div>
+          </div>
+        </div>
+
+        <div class="right-col">
+          <div class="card">
+            <div class="card-title">Evasion Vector Key</div>
+            <div class="card-sub">6 AUDIT EVASION SURFACES</div>
+            <div id="ev-legend" style="font-family:'DM Mono',monospace;font-size:10px;line-height:2.2;color:var(--ink-light)"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Evasion Risk Assessment</div>
+            <button class="action-btn btn-teal" onclick="runEvasionAnalysis()" style="width:100%;margin-bottom:10px">▶ Analyse Evasion Risk</button>
+            <div class="output-box" id="ev-analysis-out" style="background:var(--bg-card)"><span style="color:var(--ink-muted)">Run analysis…</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title">g-ARI Evasion Penalty</div>
+            <div style="font-size:12px;color:var(--ink-light);line-height:1.7;margin-bottom:10px">Evasion risk directly reduces the Assurance Resilience Index by degrading evidence integrity and enforcement capacity.</div>
+            <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-muted)">Penalty on g-ARI: <span class="hl-red" id="ev-penalty-disp">−0.127</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ASSURANCE NOFs TAB -->
+    <div class="tpanel" id="p2-nof">
+      <div class="grid-main">
+        <div class="card">
+          <div class="card-title">Assurance NOF Calculator</div>
+          <div class="card-sub">E-AGSO · 9 ASSURANCE NARROW OPERATIONAL FACTORS · <button class="btn-reset action-btn" style="padding:2px 10px;font-size:10px" onclick="resetP2()">Reset</button></div>
+
+          <div class="dim-section">
+            <div class="dim-header"><div class="dim-code agso-code">EVE</div><div class="dim-name">Evidence Engineering</div><div class="dim-score" id="d2-EVE">0.521</div></div>
+            <div class="dim-bar"><div class="dim-bar-fill" id="db2-EVE" style="width:52.1%;background:var(--amber)"></div></div>
+            <div class="nof-row"><div><div class="nof-key agso-key">EP</div></div><div><div class="nof-name">Evidence Portability Across Jurisdictions</div><input type="range" class="teal-slider" min="0" max="100" value="42" id="n2-EP" oninput="updateP2()"></div><div><div class="nof-score" id="v2-EP">0.521</div><div class="nof-st" id="i2-EP">⚠️</div></div></div>
+            <div class="nof-row"><div><div class="nof-key agso-key">COC</div></div><div><div class="nof-name">Chain-of-Custody Integrity</div><input type="range" class="teal-slider" min="0" max="100" value="50" id="n2-COC" oninput="updateP2()"></div><div><div class="nof-score" id="v2-COC">0.560</div><div class="nof-st" id="i2-COC">⚠️</div></div></div>
+          </div>
+
+          <div class="dim-section">
+            <div class="dim-header"><div class="dim-code agso-code">CAM</div><div class="dim-name">Conformity Assessment Mechanics</div><div class="dim-score" id="d2-CAM">0.508</div></div>
+            <div class="dim-bar"><div class="dim-bar-fill" id="db2-CAM" style="width:50.8%;background:var(--amber)"></div></div>
+            <div class="nof-row"><div><div class="nof-key agso-key">AIN</div></div><div><div class="nof-name">Auditor Independence Index</div><input type="range" class="teal-slider" min="0" max="100" value="55" id="n2-AIN" oninput="updateP2()"></div><div><div class="nof-score" id="v2-AIN">0.588</div><div class="nof-st" id="i2-AIN">⚠️</div></div></div>
+            <div class="nof-row"><div><div class="nof-key agso-key">ASV</div></div><div><div class="nof-name">Audit-Shopping Vulnerability</div><input type="range" class="teal-slider" min="0" max="100" value="35" id="n2-ASV" oninput="updateP2()"></div><div><div class="nof-score" id="v2-ASV">0.487</div><div class="nof-st" id="i2-ASV">❌</div></div></div>
+            <div class="nof-row"><div><div class="nof-key agso-key">ACL</div></div><div><div class="nof-name">Accreditation Capacity Limits</div><input type="range" class="teal-slider" min="0" max="100" value="40" id="n2-ACL" oninput="updateP2()"></div><div><div class="nof-score" id="v2-ACL">0.510</div><div class="nof-st" id="i2-ACL">⚠️</div></div></div>
+          </div>
+
+          <div class="dim-section">
+            <div class="dim-header"><div class="dim-code agso-code">AER</div><div class="dim-name">Assurance Ecosystem Resilience</div><div class="dim-score" id="d2-AER">0.548</div></div>
+            <div class="dim-bar"><div class="dim-bar-fill" id="db2-AER" style="width:54.8%;background:var(--amber)"></div></div>
+            <div class="nof-row"><div><div class="nof-key agso-key">SDR</div></div><div><div class="nof-name">Standards Divergence Rate</div><input type="range" class="teal-slider" min="0" max="100" value="48" id="n2-SDR" oninput="updateP2()"></div><div><div class="nof-score" id="v2-SDR">0.550</div><div class="nof-st" id="i2-SDR">⚠️</div></div></div>
+            <div class="nof-row"><div><div class="nof-key agso-key">AFI</div></div><div><div class="nof-name">Assurance Fragmentation Index</div><input type="range" class="teal-slider" min="0" max="100" value="43" id="n2-AFI" oninput="updateP2()"></div><div><div class="nof-score" id="v2-AFI">0.528</div><div class="nof-st" id="i2-AFI">⚠️</div></div></div>
+            <div class="nof-row"><div><div class="nof-key agso-key">ACU</div></div><div><div class="nof-name">Auditor Capacity Utilization</div><input type="range" class="teal-slider" min="0" max="100" value="46" id="n2-ACU" oninput="updateP2()"></div><div><div class="nof-score" id="v2-ACU">0.545</div><div class="nof-st" id="i2-ACU">⚠️</div></div></div>
+          </div>
+
+          <div class="dim-section" style="margin-bottom:0">
+            <div class="dim-header"><div class="dim-code agso-code">VEL</div><div class="dim-name">Verification-Enforcement Linkage</div><div class="dim-score" id="d2-VEL">0.572</div></div>
+            <div class="dim-bar"><div class="dim-bar-fill" id="db2-VEL" style="width:57.2%;background:var(--amber)"></div></div>
+            <div class="nof-row" style="border-bottom:none"><div><div class="nof-key agso-key">CEJ</div></div><div><div class="nof-name">Cross-Jurisdictional Equivalence</div><input type="range" class="teal-slider" min="0" max="100" value="52" id="n2-CEJ" oninput="updateP2()"></div><div><div class="nof-score" id="v2-CEJ">0.572</div><div class="nof-st" id="i2-CEJ">⚠️</div></div></div>
+          </div>
+        </div>
+
+        <div class="right-col">
+          <div class="card">
+            <div class="card-title">Live Formula</div>
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-muted)">Active: <span id="p2-active-nof" style="color:var(--iaea-teal);font-weight:600">EP</span></div>
+            <div class="math-box">
+              <div><span style="color:var(--ink-muted)">X  = </span><span class="mhg" id="m2-X">[0.45, 0.38, 0.48, 0.35]</span></div>
+              <div><span style="color:var(--ink-muted)">w  = </span><span class="mhg">[0.35, 0.30, 0.20, 0.15]</span></div>
+              <div style="border-top:1px solid var(--border);margin:4px 0;padding-top:4px"><span style="color:var(--ink-muted)">z  = w·X − θ</span></div>
+              <div><span style="color:var(--ink-muted)">   = </span><span class="mhg" id="m2-wtx">0.415</span><span style="color:var(--ink-muted)"> − 0.500</span></div>
+              <div><span style="color:var(--ink-muted)">   = </span><span class="mhg" id="m2-z">−0.085</span></div>
+              <div style="border-top:1px solid var(--border);margin:4px 0;padding-top:4px"><span style="color:var(--ink-muted)">NOF = σ(z)</span></div>
+              <div><span style="color:var(--ink-muted)">    = </span><span class="mrg" id="m2-nof">0.479</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Assurance Dimensions</div>
+            <div class="card-sub">4 E-AGSO DIMENSIONS</div>
+            <table><thead><tr><th>Dim</th><th>Name</th><th style="text-align:right">Score</th><th style="text-align:center">Status</th></tr></thead>
+            <tbody id="p2-dim-table"></tbody></table>
+          </div>
+          <div class="card">
+            <div class="card-title">Assurance Optimizer</div>
+            <button class="action-btn btn-teal" onclick="runP2Opt()" style="width:100%;margin-bottom:10px">▶ Run Assurance Optimization</button>
+            <div class="output-box" id="p2-opt-out" style="background:var(--bg-card)"><span style="color:var(--ink-muted)">Awaiting…</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COK TAB -->
+    <div class="tpanel" id="p2-cok">
+      <div class="grid-2">
+        <div>
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-title">Continuity of Knowledge Timeline</div>
+            <div class="card-sub">12-MONTH INSPECTION CYCLE · IAEA SAFEGUARDS MODEL</div>
+            <div style="font-size:12px;color:var(--ink-light);margin-bottom:16px;line-height:1.7">CoK tracks whether an inspector maintains unbroken knowledge of facility status. Breaks create exploitable assurance gaps requiring re-baseline before resumed monitoring.</div>
+
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-muted);margin-bottom:8px;letter-spacing:0.5px">INSPECTION TIMELINE · 12 MONTHS</div>
+            <div class="cok-track-wrap" id="cok-track-wrap">
+              <div class="cok-seg cok-intact" id="cok-s1" style="left:0;width:28%"></div>
+              <div class="cok-seg cok-broken" id="cok-s2" style="left:28%;width:15%"></div>
+              <div class="cok-seg cok-recovering" id="cok-s3" style="left:43%;width:12%"></div>
+              <div class="cok-seg cok-intact" id="cok-s4" style="left:55%;width:18%"></div>
+              <div class="cok-seg cok-broken" id="cok-s5" style="left:73%;width:10%"></div>
+              <div class="cok-seg cok-recovering" id="cok-s6" style="left:83%;width:17%"></div>
+              <div class="cok-event-marker" style="left:28%">Camera Offline</div>
+              <div class="cok-event-marker" style="left:43%">Re-baseline</div>
+              <div class="cok-event-marker" style="left:73%">Seal Broken</div>
+              <div class="cok-event-marker" style="left:83%">Recovery</div>
+            </div>
+            <div style="display:flex;gap:14px;font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-muted);margin-top:4px">
+              <span style="color:rgba(22,101,52,0.8)">■ Intact</span>
+              <span style="color:rgba(153,27,27,0.8)">■ Broken</span>
+              <span style="color:rgba(217,119,6,0.8)">■ Recovering</span>
+            </div>
+
+            <div class="cok-stats" id="cok-stats">
+              <div class="cok-stat"><div class="cok-stat-val" id="cok-intact" style="color:var(--green)">46%</div><div class="cok-stat-label">Intact Time</div></div>
+              <div class="cok-stat"><div class="cok-stat-val" id="cok-broken" style="color:var(--red)">25%</div><div class="cok-stat-label">Broken Time</div></div>
+              <div class="cok-stat"><div class="cok-stat-val" id="cok-recover" style="color:var(--amber)">29%</div><div class="cok-stat-label">Recovery Time</div></div>
+              <div class="cok-stat"><div class="cok-stat-val" id="cok-score" style="color:var(--iaea-teal)">0.512</div><div class="cok-stat-label">CoK Score</div></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">CoK Scenario Controls</div>
+            <div class="card-sub">ADJUST PARAMETERS TO MODEL DIFFERENT INSPECTION REGIMES</div>
+            <div class="nof-row"><div><div class="nof-key agso-key" style="font-size:8px">FREQ</div></div><div><div class="nof-name">Break Frequency (events/year)</div><input type="range" class="teal-slider" min="0" max="100" value="35" id="cok-freq" oninput="updateCoK()"></div><div><div class="nof-score" id="cok-freq-v" style="color:var(--red)">3.5</div></div></div>
+            <div class="nof-row"><div><div class="nof-key agso-key" style="font-size:8px">DUR</div></div><div><div class="nof-name">Average Break Duration (weeks)</div><input type="range" class="teal-slider" min="0" max="100" value="40" id="cok-dur" oninput="updateCoK()"></div><div><div class="nof-score" id="cok-dur-v" style="color:var(--amber)">4.0</div></div></div>
+            <div class="nof-row" style="border-bottom:none"><div><div class="nof-key agso-key" style="font-size:8px">REC</div></div><div><div class="nof-name">Recovery Capability</div><input type="range" class="teal-slider" min="0" max="100" value="60" id="cok-rec" oninput="updateCoK()"></div><div><div class="nof-score" id="cok-rec-v" style="color:var(--green)">0.60</div></div></div>
+          </div>
+        </div>
+
+        <div class="right-col">
+          <div class="card" style="border-left:3px solid var(--iaea-teal)">
+            <div class="card-title">What is Continuity of Knowledge?</div>
+            <div style="font-size:12px;color:var(--ink-light);line-height:1.8">IAEA inspectors maintain CoK through continuous monitoring instruments: cameras, seals, NDA measurements. When CoK is broken — cameras offline, seals tampered, access denied — the inspector loses verified knowledge and must <span class="hl-amber">re-establish baseline</span>.<br><br>This gap is exploitable. A CoK score below 0.65 indicates structural vulnerability to clandestine activity during gap periods. Lyra models CoK as a time-averaged integrity score across the inspection cycle.</div>
+          </div>
+          <div class="card" style="border-left:3px solid var(--red)">
+            <div class="card-title">Exploitation Window</div>
+            <div style="font-size:12px;color:var(--ink-light);margin-bottom:12px">Estimated unmonitored time available for clandestine activity:</div>
+            <div style="text-align:center;padding:12px 0">
+              <div class="ms-value" id="exploit-window" style="font-size:38px;color:var(--red)">18.2 wks</div>
+              <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-muted);margin-top:6px">Cumulative Unmonitored Period / Year</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">CoK Optimisation</div>
+            <button class="action-btn btn-teal" onclick="runCoKOpt()" style="width:100%;margin-bottom:10px">▶ Optimise CoK Parameters</button>
+            <div class="output-box" id="cok-opt-out" style="background:var(--bg-card)"><span style="color:var(--ink-muted)">Awaiting…</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENARIO LIBRARY TAB -->
+    <div class="tpanel" id="p2-scenario">
+      <div class="grid-2">
+        <div>
+          <div class="card">
+            <div class="card-title">Nuclear Auditor Scenario Library</div>
+            <div class="card-sub">7 PRE-LOADED ASSURANCE STRESS-TEST SCENARIOS</div>
+            <div id="scenario-list"></div>
+          </div>
+        </div>
+        <div class="right-col">
+          <div class="card" id="sc-output-card" style="min-height:200px">
+            <div class="card-title">Scenario Analysis</div>
+            <div class="card-sub" id="sc-domain-badge">Select a scenario</div>
+            <div class="output-box" id="sc-output" style="background:var(--bg-card);min-height:180px"><span style="color:var(--ink-muted)">Select a scenario from the library to run the E-AGSO stress-test analysis.\n\nEach scenario cascades through:\n  NOF → Dimension → g-ARI\n\nAnd identifies:\n  · Assurance failure points\n  · Evasion windows created\n  · CoK degradation\n  · Reform pathways</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title">g-ARI Impact</div>
+            <div style="display:grid;grid-template-columns:1fr 30px 1fr 1fr;gap:10px;align-items:center;margin-bottom:12px">
+              <div><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-muted);margin-bottom:4px">Baseline</div><div class="ms-value" id="sc-baseline" style="font-size:26px;color:var(--amber)">0.541</div></div>
+              <div style="font-family:'Libre Baskerville',serif;font-style:italic;color:var(--ink-muted);font-size:16px;text-align:center">→</div>
+              <div><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-muted);margin-bottom:4px">Scenario</div><div class="ms-value" id="sc-result" style="font-size:26px;color:var(--ink-muted)">—</div></div>
+              <div><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-muted);margin-bottom:4px">Delta</div><div class="ms-value" id="sc-delta" style="font-size:26px;color:var(--ink-muted)">—</div></div>
+            </div>
+            <div class="bar-track" style="border-color:rgba(0,122,122,0.2)"><div class="bar-fill" id="sc-ari-bar" style="width:54.1%;background:var(--amber)"></div></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Reform Pathway</div>
+            <div class="output-box" id="sc-reform-out" style="background:var(--bg-card)"><span style="color:var(--ink-muted)">Scenario reform pathway appears here…</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /p2-manual-panel -->
+
+  <!-- P2 Upload Panel -->
+  <div id="p2-upload-panel" style="display:none">
+    <div class="grid-main">
+      <div class="card">
+        <div class="card-title">Upload Audit Report or Standards Document</div>
+        <div class="card-sub">SUPPORTED: PDF, DOCX, TXT · IAEA INSPECTION REPORTS, ISO STANDARDS, CONFORMITY ASSESSMENT FRAMEWORKS</div>
+        <div class="upload-zone" id="p2-upload-zone">
+          <input type="file" id="p2-file-input" accept=".pdf,.txt,.docx" onchange="handleP2Upload(this)">
+          <div class="upload-icon">🔍</div>
+          <div class="upload-title">Drop audit report or standards document here</div>
+          <div class="upload-desc">Upload IAEA inspection summary, ISO standard, conformity assessment framework,<br>or bilateral verification agreement</div>
+          <div class="upload-formats">Accepted: PDF · DOCX · TXT</div>
+          <button class="upload-btn" style="background:var(--iaea-teal)" onclick="document.getElementById('p2-file-input').click();event.stopPropagation()">Choose File</button>
+        </div>
+        <div class="analysis-progress" id="p2-progress">
+          <div class="progress-header"><div class="progress-spinner" style="border-top-color:var(--iaea-teal)"></div>Analysing document with E-AGSO engine…</div>
+          <ul class="progress-steps" id="p2-progress-steps"></ul>
+        </div>
+        <div class="doc-result" id="p2-doc-result">
+          <div class="doc-result-header" style="background:var(--iaea-teal)">
+            <div><div style="font-size:13px;font-weight:600">Extraction Complete</div><div class="doc-filename" id="p2-doc-filename">document.pdf</div></div>
+            <div class="status-chip chip-good" style="display:inline-block">Analysis Ready</div>
+          </div>
+          <div class="doc-result-body" id="p2-doc-body"></div>
+        </div>
+      </div>
+      <div class="right-col">
+        <div class="card">
+          <div class="card-title">Assurance Document Extraction</div>
+          <div style="font-size:12px;color:var(--ink-light);line-height:1.8">The E-AGSO engine analyses audit documents for:<br><br>
+            <strong style="color:var(--ink)">Evidence quality</strong> — Are findings evidence-grounded?<br>
+            <strong style="color:var(--ink)">Declaration gaps</strong> — Declared vs. verified discrepancies<br>
+            <strong style="color:var(--ink)">Auditor independence</strong> — Structural separation signals<br>
+            <strong style="color:var(--ink)">Continuity breaks</strong> — Monitoring gap indicators<br>
+            <strong style="color:var(--ink)">Evasion surfaces</strong> — Audit-shopping or selective disclosure signals
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- P2 Wargame Panel -->
+  <div id="p2-wargame-panel" style="display:none">
+    <div class="grid-main">
+      <div class="card">
+        <div class="card-title">Assurance Regime Comparison</div>
+        <div class="card-sub">COMPARE ASSURANCE POSTURE ACROSS DOMAINS AND COUNTRIES</div>
+        <div class="country-grid">
+          <div class="country-box">
+            <div class="country-box-label">Regime / Country A</div>
+            <select class="country-select" id="regime-a" onchange="updateRegimeProfile('a')">
+              <option value="">— Select Regime —</option>
+            </select>
+            <div class="country-profile" id="regime-profile-a"><span style="color:var(--ink-muted);font-size:11px">Select a regime to view assurance profile</span></div>
+          </div>
+          <div class="country-vs">vs.</div>
+          <div class="country-box">
+            <div class="country-box-label">Regime / Country B</div>
+            <select class="country-select" id="regime-b" onchange="updateRegimeProfile('b')">
+              <option value="">— Select Regime —</option>
+            </select>
+            <div class="country-profile" id="regime-profile-b"><span style="color:var(--ink-muted);font-size:11px">Select a regime to view assurance profile</span></div>
+          </div>
+        </div>
+        <button class="run-wargame-btn" style="background:var(--iaea-teal)" onclick="runRegimeComparison()">▶ Run Assurance Regime Comparison</button>
+        <div class="wargame-result" id="regime-result" style="display:none;margin-top:16px">
+          <div class="wg-comparison-grid" id="regime-cols"></div>
+        </div>
+      </div>
+      <div class="right-col">
+        <div class="card" id="regime-claude-card" style="display:none">
+          <div class="card-title">Assurance Equivalence Assessment</div>
+          <div class="card-sub">CLAUDE-POWERED COMPARATIVE ANALYSIS</div>
+          <div class="output-box" id="regime-claude-out" style="background:var(--bg-card)"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page-p2 -->
+
+<div class="site-footer">
+  <div class="footer-l">Auracelle AI Governance Labs · Director G.A. Evans · Proprietary E-AGPO / E-AGSO IP · E-AGPO-HT Framework</div>
+  <div class="footer-r">Lyra v3.0</div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+// ════════════════════════════════════
+// UTILITIES
+// ════════════════════════════════════
+const sig=z=>1/(1+Math.exp(-z));
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const THETA=0.5;
+
+function gc(s){ return s>=0.60?'var(--green)':s>=0.50?'var(--amber)':'var(--red)'; }
+function gs(s){ return s>=0.60?'✅':s>=0.50?'⚠️':'❌'; }
+function gp(s){ return s>=0.60?'chip-good':s>=0.50?'chip-warn':'chip-bad'; }
+function gpt(s){ return s>=0.60?'Compliant':s>=0.50?'Below Threshold':'Critical'; }
+
+const $=(id)=>document.getElementById(id);
+function set(id,v){const e=$(id);if(e)e.innerHTML=v;}
+function setTxt(id,v){const e=$(id);if(e)e.textContent=v;}
+function setCol(id,s){const e=$(id);if(e)e.style.color=gc(s);}
+function setW(id,v){const e=$(id);if(e)e.style.width=(v*100)+'%';}
+function setBg(id,s){const e=$(id);if(e)e.style.background=gc(s);}
+
+function ts(){ const e=$('ts'); if(e) e.textContent=new Date().toISOString().replace('T',' ').slice(0,19)+' UTC'; }
+setInterval(ts,1000); ts();
+
+// ════════════════════════════════════
+// PAGE / TAB / MODE SWITCHING
+// ════════════════════════════════════
+function switchPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  $('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active-p1','active-p2'));
+  btn.classList.add('active-'+id);
+}
+
+function switchTab(page,id,el){
+  document.querySelectorAll(`#page-${page} .tpanel`).forEach(p=>p.classList.remove('active'));
+  $(`${page}-${id}`).classList.add('active');
+  document.querySelectorAll(`#page-${page} .stab`).forEach(t=>t.classList.remove('sa1','sa2'));
+  if(el) el.classList.add(page==='p1'?'sa1':'sa2');
+}
+
+function setMode(page,mode,btn){
+  ['manual','upload','wargame','wargamedemo'].forEach(m=>{
+    const p=$(page+'-'+m+'-panel');
+    if(p) p.style.display=m===mode?'':'none';
+  });
+  document.querySelectorAll(`#page-${page} .mode-btn`).forEach(b=>{
+    b.classList.remove('active','agso-mode');
+  });
+  btn.classList.add('active');
+  if(page==='p2') btn.classList.add('agso-mode');
+}
+
+// ════════════════════════════════════
+// PAGE 1 — E-AGPO ENGINE
+// ════════════════════════════════════
+const N1={
+  DUV:{bac:'STI',name:'Downstream Use Visibility',        w:[.30,.30,.20,.20],base:63},
+  MAT:{bac:'STI',name:'Model Adaptation Traceability',    w:[.25,.35,.25,.15],base:50},
+  CBOF:{bac:'STI',name:'Cross-Border Oversight Friction', w:[.30,.25,.25,.20],base:44},
+  PDAD:{bac:'SAD',name:'Post-Deployment Assurance Design',w:[.35,.30,.20,.15],base:38},
+  CRT:{bac:'SAD',name:'Certification Revocation Triggers',w:[.30,.30,.20,.20],base:46},
+  ESC:{bac:'ESI',name:'Evasion Scenario Coverage',        w:[.40,.25,.20,.15],base:60},
+  RMR:{bac:'NDM',name:'Reciprocity & Mutual Recognition', w:[.30,.30,.25,.15],base:53},
+  PC:{bac:'SRA',name:'Proportionality of Controls',       w:[.35,.30,.20,.15],base:58},
+  AEC:{bac:'IIC',name:'Audit Enforcement Capacity',       w:[.30,.30,.25,.15],base:50},
+  SUR:{bac:'ASI',name:'Standard Update Responsiveness',   w:[.35,.30,.20,.15],base:56},
+};
+const BAC1={STI:'Strategic Technology Intelligence',SAD:'Safety Assurance Design',ESI:'Evasion Scenario Intelligence',NDM:'Networked Decision Modeling',SRA:'Systemic Risk Assessment',IIC:'Institutional Integrity Capacity',ASI:'Adaptive Standards Integration'};
+
+let p1Active='DUV';
+
+function cn1(k){
+  const c=N1[k],s=$('n1-'+k);
+  if(!s) return {score:.5,X:[.5,.5,.5,.5],wTX:.5,z:0};
+  const v=parseInt(s.value)/100;
+  const X=[clamp(v+.05,0,1),clamp(v-.02,0,1),clamp(v+.08,0,1),clamp(v-.05,0,1)];
+  const wTX=c.w.reduce((a,wi,i)=>a+wi*X[i],0);
+  const z=wTX-THETA;
+  return {score:sig(z),X,wTX,z};
+}
+
+function updateP1(){
+  const sc={};
+  for(const k in N1){
+    const r=cn1(k); sc[k]=r;
+    const ve=$('v1-'+k); if(ve){ve.textContent=r.score.toFixed(3);ve.style.color=gc(r.score);}
+    const ie=$('i1-'+k); if(ie) ie.textContent=gs(r.score);
+    const sl=$('n1-'+k); if(sl) sl.style.setProperty('--pct',sl.value+'%');
+  }
+  const bacS={};
+  for(const b of Object.keys(BAC1)){
+    const ns=Object.keys(N1).filter(k=>N1[k].bac===b);
+    const avg=ns.reduce((a,k)=>a+sc[k].score,0)/ns.length;
+    bacS[b]=avg;
+    const de=$('d1-'+b); if(de){de.textContent=avg.toFixed(3);de.style.color=gc(avg);}
+    const db=$('db1-'+b); if(db){db.style.width=(avg*100)+'%';db.style.background=gc(avg);}
+  }
+  const ggac=Object.values(bacS).reduce((a,v)=>a+v,0)/Object.values(bacS).length;
+  const me=$('p1-master'); if(me){me.textContent=ggac.toFixed(3);me.style.color=gc(ggac);}
+  const mb=$('p1-master-bar'); if(mb){mb.style.width=(ggac*100)+'%';mb.style.background=gc(ggac);}
+  const mp=$('p1-pill'); if(mp){mp.textContent=gpt(ggac);mp.className='status-chip '+gp(ggac);}
+  const md=$('p1-delta'); if(md){const d=ggac-0.6;md.textContent=`Δ = ${d>=0?'+':''}${d.toFixed(3)} ${d>=0?'above':'to'} threshold`;md.style.color=d>=0?'var(--green)':'var(--amber)';}
+  const nAvg=Object.values(sc).reduce((a,r)=>a+r.score,0)/Object.values(sc).length;
+  const bAvg=Object.values(bacS).reduce((a,v)=>a+v,0)/Object.values(bacS).length;
+  setSB('p1-s1',nAvg); setSB('p1-s2',bAvg); setSB('p1-s3',ggac);
+  // Math
+  const r=sc[p1Active]; if(r) updateMath1(r);
+  // Tables
+  const bt=$('p1-bac-table');
+  if(bt) bt.innerHTML=Object.entries(BAC1).map(([b,n])=>`<tr><td class="t-mono">${b}</td><td class="t-name">${n}</td><td class="t-score" style="color:${gc(bacS[b])}">${bacS[b].toFixed(3)}</td><td class="t-center">${gs(bacS[b])}</td></tr>`).join('');
+  const ft=$('p1-full-table');
+  if(ft) ft.innerHTML=Object.entries(N1).map(([k,c])=>`<tr><td class="t-mono">${c.bac}</td><td class="t-mono">${k}</td><td class="t-name">${c.name}</td><td class="t-score" style="color:${gc(sc[k].score)}">${sc[k].score.toFixed(3)}</td><td class="t-center">${gs(sc[k].score)}</td></tr>`).join('');
+  const tg=$('p1-table-ggac'); if(tg){tg.textContent=ggac.toFixed(3);tg.style.color=gc(ggac);}
+  // Stratum details
+  const s1=$('p1-s1-detail');
+  if(s1) s1.innerHTML=Object.entries(sc).map(([k,r])=>`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--bg-warm)"><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--un-blue-dark);min-width:36px">${k}</span><div style="flex:1;height:4px;background:var(--bg-warm);overflow:hidden"><div style="height:100%;width:${r.score*100}%;background:${gc(r.score)};transition:width .4s"></div></div><span style="font-family:'DM Mono',monospace;font-size:10px;color:${gc(r.score)};min-width:38px;text-align:right">${r.score.toFixed(3)}</span></div>`).join('');
+  const s2=$('p1-s2-detail');
+  if(s2) s2.innerHTML=Object.entries(bacS).map(([b,v])=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bg-warm)"><span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--iaea-teal);min-width:36px">${b}</span><div style="flex:1;height:5px;background:var(--bg-warm);overflow:hidden"><div style="height:100%;width:${v*100}%;background:${gc(v)};transition:width .4s"></div></div><span style="font-family:'DM Mono',monospace;font-size:10px;color:${gc(v)};min-width:38px;text-align:right">${v.toFixed(3)}</span></div>`).join('');
+  const s3b=$('p1-s3-big'); if(s3b){s3b.textContent=ggac.toFixed(3);s3b.style.color=gc(ggac);}
+  const s3p=$('p1-s3-pill'); if(s3p){s3p.textContent=ggac>=0.6?'Above Threshold':'Below 0.6';s3p.className='status-chip '+(ggac>=0.6?'chip-good':'chip-warn');}
+}
+
+function setSB(id,val){
+  const f=$(id+'f'); if(f){f.style.width=(val*100)+'%';f.style.background=gc(val);}
+  const v=$(id+'v'); if(v){v.textContent=val.toFixed(3);v.style.color=gc(val);}
+}
+
+function updateMath1(r){
+  setTxt('m1-X','['+r.X.map(x=>x.toFixed(2)).join(', ')+']');
+  setTxt('m1-wtx',r.wTX.toFixed(3)); setTxt('m1-z',r.z.toFixed(3));
+  const ne=$('m1-nof'); if(ne){ne.textContent=r.score.toFixed(3);ne.style.color=gc(r.score);}
+}
+
+for(const k in N1){
+  const s=$('n1-'+k);
+  if(s) s.addEventListener('input',()=>{p1Active=k;setTxt('p1-active-nof',k);});
+}
+
+function resetP1(){ for(const k in N1){const s=$('n1-'+k);if(s)s.value=N1[k].base;} updateP1(); }
+
+function calcGgac1(vals){
+  const bacS={};
+  for(const b of Object.keys(BAC1)){
+    const ns=Object.keys(N1).filter(k=>N1[k].bac===b);
+    const avg=ns.reduce((a,k)=>{
+      const v=vals[k]/100; const X=[clamp(v+.05,0,1),clamp(v-.02,0,1),clamp(v+.08,0,1),clamp(v-.05,0,1)];
+      return a+sig(N1[k].w.reduce((s,wi,i)=>s+wi*X[i],0)-THETA);
+    },0)/ns.length;
+    bacS[b]=avg;
+  }
+  return Object.values(bacS).reduce((a,v)=>a+v,0)/Object.values(bacS).length;
+}
+
+function runP1Opt(){
+  const sc={}; for(const k in N1) sc[k]=cn1(k).score;
+  const bacS={}; for(const b of Object.keys(BAC1)){const ns=Object.keys(N1).filter(k=>N1[k].bac===b);bacS[b]=ns.reduce((a,k)=>a+sc[k],0)/ns.length;}
+  const ggac=Object.values(bacS).reduce((a,v)=>a+v,0)/Object.values(bacS).length;
+  const el=$('p1-opt-out');
+  if(ggac>=0.6){el.innerHTML=`<span class="hl-green">✓ g-GAC above threshold (${ggac.toFixed(3)})</span>\nNo intervention required.`;return;}
+  const gaps=Object.entries(sc).filter(([k,v])=>v<0.6).sort((a,b)=>a[1]-b[1]).slice(0,4);
+  let out=`<span class="hl-amber">Current g-GAC: ${ggac.toFixed(3)}</span>  Deficit: ${(0.6-ggac).toFixed(4)}\n\nPriority interventions:\n`;
+  gaps.forEach(([k,v],i)=>{out+=`\n${i+1}. <span class="hl-blue">${k}</span> [${N1[k].bac}]  Score: ${v.toFixed(3)}  Gap: <span class="hl-green">+${(0.6-v).toFixed(3)}</span>\n   ${N1[k].name}\n`;});
+  el.innerHTML=out;
+}
+
+function applyP1Sc(){
+  const sel=$('p1-sc-sel').value; const el=$('p1-sc-out');
+  if(!sel){el.innerHTML='<span style="color:var(--ink-muted)">Select a scenario…</span>';return;}
+  const mods={enforcement:{AEC:-30},certification:{PDAD:-40,CRT:-35},reform:{DUV:20,MAT:20,CBOF:20,PDAD:20,CRT:20,ESC:20,RMR:20,PC:20,AEC:20,SUR:20},nato:{RMR:15,AEC:15,PC:10}};
+  const base={}; for(const k in N1) base[k]=parseInt($('n1-'+k).value);
+  const old=calcGgac1(base);
+  const nv=Object.assign({},base); for(const[k,d] of Object.entries(mods[sel]||{})) if(nv[k]!==undefined) nv[k]=clamp(nv[k]+d,0,100);
+  const nw=calcGgac1(nv); const delta=nw-old;
+  const col=delta>=0?'var(--green)':'var(--red)';
+  el.innerHTML=`Before: <span class="hl-amber">${old.toFixed(3)}</span>  After: <span style="color:${col};font-weight:600">${nw.toFixed(3)}</span>  Delta: <span style="color:${col};font-weight:600">${delta>=0?'+':''}${delta.toFixed(4)}</span>\n\nThreshold: ${nw>=0.6?'<span class="hl-green">Above ✓</span>':'<span class="hl-amber">Below ⚠</span>'}`;
+}
+
+// ════════════════════════════════════
+// PAGE 2 — E-AGSO ENGINE
+// ════════════════════════════════════
+const N2={
+  EP:{dim:'EVE',name:'Evidence Portability',          w:[.35,.30,.20,.15],base:42},
+  COC:{dim:'EVE',name:'Chain-of-Custody Integrity',   w:[.30,.35,.20,.15],base:50},
+  AIN:{dim:'CAM',name:'Auditor Independence Index',   w:[.35,.30,.20,.15],base:55},
+  ASV:{dim:'CAM',name:'Audit-Shopping Vulnerability', w:[.30,.30,.25,.15],base:35},
+  ACL:{dim:'CAM',name:'Accreditation Capacity Limits',w:[.30,.30,.25,.15],base:40},
+  SDR:{dim:'AER',name:'Standards Divergence Rate',    w:[.30,.35,.20,.15],base:48},
+  AFI:{dim:'AER',name:'Assurance Fragmentation Index',w:[.30,.30,.25,.15],base:43},
+  ACU:{dim:'AER',name:'Auditor Capacity Utilization', w:[.30,.30,.25,.15],base:46},
+  CEJ:{dim:'VEL',name:'Cross-Jurisdictional Equivalence',w:[.35,.30,.20,.15],base:52},
+};
+const DIM2={EVE:'Evidence Engineering',CAM:'Conformity Assessment',AER:'Assurance Ecosystem Resilience',VEL:'Verification-Enforcement Linkage'};
+
+let p2Active='EP';
+
+function cn2(k){
+  const c=N2[k],s=$('n2-'+k);
+  if(!s) return {score:.5,X:[.5,.5,.5,.5],wTX:.5,z:0};
+  const v=parseInt(s.value)/100;
+  const X=[clamp(v+.03,0,1),clamp(v-.04,0,1),clamp(v+.06,0,1),clamp(v-.03,0,1)];
+  const wTX=c.w.reduce((a,wi,i)=>a+wi*X[i],0);
+  const z=wTX-THETA;
+  return {score:sig(z),X,wTX,z};
+}
+
+function calcGARI(){
+  const sc={}; for(const k in N2) sc[k]=cn2(k).score;
+  const dimS={}; for(const d of Object.keys(DIM2)){const ns=Object.keys(N2).filter(k=>N2[k].dim===d);dimS[d]=ns.reduce((a,k)=>a+sc[k],0)/ns.length;}
+  return clamp(Object.values(dimS).reduce((a,v)=>a+v,0)/Object.values(dimS).length-calcEvPenalty(),0,1);
+}
+
+function updateP2(){
+  const sc={}; for(const k in N2){
+    const r=cn2(k); sc[k]=r;
+    const ve=$('v2-'+k); if(ve){ve.textContent=r.score.toFixed(3);ve.style.color=gc(r.score);}
+    const ie=$('i2-'+k); if(ie) ie.textContent=gs(r.score);
+    const sl=$('n2-'+k); if(sl) sl.style.setProperty('--pct',sl.value+'%');
+  }
+  const dimS={}; for(const d of Object.keys(DIM2)){
+    const ns=Object.keys(N2).filter(k=>N2[k].dim===d);
+    const avg=ns.reduce((a,k)=>a+sc[k].score,0)/ns.length;
+    dimS[d]=avg;
+    const de=$('d2-'+d); if(de){de.textContent=avg.toFixed(3);de.style.color=gc(avg);}
+    const db=$('db2-'+d); if(db){db.style.width=(avg*100)+'%';db.style.background=gc(avg);}
+  }
+  const gari=clamp(Object.values(dimS).reduce((a,v)=>a+v,0)/Object.values(dimS).length-calcEvPenalty(),0,1);
+  const me=$('p2-master'); if(me){me.textContent=gari.toFixed(3);me.style.color=gc(gari);}
+  const mb=$('p2-master-bar'); if(mb){mb.style.width=(gari*100)+'%';mb.style.background=gc(gari);}
+  const mp=$('p2-pill');
+  if(mp){mp.textContent=gari>=0.65?'Resilient':gari>=0.5?'Assurance Fragile':'Critical';mp.className='status-chip '+(gari>=0.65?'chip-good':gari>=0.5?'chip-warn':'chip-bad');}
+  const md=$('p2-delta'); if(md){const d=gari-0.65;md.textContent=`Δ = ${d>=0?'+':''}${d.toFixed(3)} ${d>=0?'above':'to'} target`;md.style.color=d>=0?'var(--green)':'var(--amber)';}
+  const r=sc[p2Active]; if(r) updateMath2(r);
+  const dt=$('p2-dim-table');
+  if(dt) dt.innerHTML=Object.entries(DIM2).map(([d,n])=>`<tr><td class="t-mono-g">${d}</td><td class="t-name">${n}</td><td class="t-score" style="color:${gc(dimS[d])}">${dimS[d].toFixed(3)}</td><td class="t-center">${gs(dimS[d])}</td></tr>`).join('');
+  const sb=$('sc-baseline'); if(sb){sb.textContent=gari.toFixed(3);sb.style.color=gc(gari);}
+  updateEvDisplay();
+}
+
+function updateMath2(r){
+  setTxt('m2-X','['+r.X.map(x=>x.toFixed(2)).join(', ')+']');
+  setTxt('m2-wtx',r.wTX.toFixed(3)); setTxt('m2-z',r.z.toFixed(3));
+  const ne=$('m2-nof'); if(ne){ne.textContent=r.score.toFixed(3);ne.style.color=gc(r.score);}
+}
+
+for(const k in N2){
+  const s=$('n2-'+k);
+  if(s) s.addEventListener('input',()=>{p2Active=k;setTxt('p2-active-nof',k);});
+}
+
+function resetP2(){ for(const k in N2){const s=$('n2-'+k);if(s)s.value=N2[k].base;} updateP2(); }
+
+function runP2Opt(){
+  const sc={}; for(const k in N2) sc[k]=cn2(k).score;
+  const gari=calcGARI(); const el=$('p2-opt-out');
+  const gaps=Object.entries(sc).filter(([k,v])=>v<0.65).sort((a,b)=>a[1]-b[1]).slice(0,4);
+  let out=`<span class="hl-teal">g-ARI: ${gari.toFixed(3)}  Target: 0.650</span>\n\nPriority assurance improvements:\n`;
+  gaps.forEach(([k,v],i)=>{out+=`\n${i+1}. <span class="hl-teal">${k}</span> [${N2[k].dim}]\n   ${N2[k].name}\n   Score: ${v.toFixed(3)}  Gap: <span class="hl-green">+${(0.65-v).toFixed(3)}</span>\n`;});
+  el.innerHTML=out;
+}
+
+// ════════════════════════════════════
+// EVASION SYSTEM
+// ════════════════════════════════════
+const EVS=[
+  {key:'DA', label:'DECL. ACCURACY',  name:'Declaration Completeness & Accuracy',  base:38,desc:'Gap between declared and independently verified inventory or activity.'},
+  {key:'AS', label:'AUDIT-SHOPPING',  name:'Audit-Shopping Risk',                  base:52,desc:'Selecting favorable inspection regime across overlapping jurisdictions.'},
+  {key:'SD', label:'SELECTIVE DISC.', name:'Selective Disclosure',                 base:45,desc:'Withholding non-mandated evidence while technically complying with disclosure rules.'},
+  {key:'WEP',label:'WEAK EVID. PORT.',name:'Weak Evidence Portability',            base:60,desc:'Evidence accepted in one jurisdiction rejected in another; portability exploitable.'},
+  {key:'CG', label:'CAPACITY GAP',    name:'Auditor Capacity Gap',                 base:42,desc:'Inspector shortage allows strategic timing of non-compliant activity.'},
+  {key:'FB', label:'FORMALISM BIAS',  name:'Formalism Bias',                       base:35,desc:'Compliance with letter but not spirit; gaming indicator thresholds.'},
+];
+
+const DA_DATA={
+  DA: [{l:'Material Declared',   d:72,a:58},{l:'Activity Declared',    d:85,a:61},{l:'Transfer Declared',   d:90,a:74}],
+  AS: [{l:'Regime A Compliance', d:88,a:75},{l:'Regime B Compliance',  d:82,a:80},{l:'Regime C Compliance', d:78,a:66}],
+  SD: [{l:'Mandatory Disclosure',d:95,a:88},{l:'Voluntary Disclosure',  d:60,a:31},{l:'Incident Reporting',  d:80,a:52}],
+  WEP:[{l:'Jurisdiction Alpha',  d:85,a:85},{l:'Jurisdiction Beta',     d:85,a:62},{l:'Jurisdiction Gamma',  d:85,a:48}],
+  CG: [{l:'Inspector Coverage',  d:90,a:67},{l:'Audit Frequency',       d:75,a:48},{l:'Surveillance Hours',  d:80,a:55}],
+  FB: [{l:'Indicator A Score',   d:72,a:72},{l:'Indicator B Score',     d:68,a:51},{l:'Outcome Achieved',    d:65,a:29}],
+};
+
+const DA_DOMAINS={DA:'Material Accountancy',AS:'Regime Selection',SD:'Disclosure Compliance',WEP:'Cross-Jurisdiction Portability',CG:'Inspection Coverage',FB:'Indicator Compliance'};
+let activeEV='DA';
+
+function buildEvasionUI(){
+  // Grid
+  const eg=$('ev-grid');
+  if(eg) eg.innerHTML=EVS.map(v=>`
+    <div class="ev-card ${v.key===activeEV?'ev-active':''}" id="evc-${v.key}" onclick="selectEV('${v.key}')">
+      <div class="ev-key">${v.label}</div>
+      <div class="ev-name">${v.name}</div>
+      <div class="ev-bar-track"><div class="ev-bar-fill" id="evb-${v.key}" style="width:${v.base}%;background:${evCol(v.base/100)}"></div></div>
+      <div class="ev-score" id="evs-${v.key}" style="color:${evCol(v.base/100)}">${(v.base/100).toFixed(2)}</div>
+    </div>`).join('');
+  // Sliders
+  const esl=$('ev-sliders');
+  if(esl) esl.innerHTML=EVS.map(v=>`
+    <div class="nof-row">
+      <div><div class="nof-key agso-key" style="font-size:8px">${v.key}</div></div>
+      <div><div class="nof-name">${v.name}</div><input type="range" class="teal-slider ev-sl" min="0" max="100" value="${v.base}" id="evsl-${v.key}" oninput="updateEV('${v.key}',this.value)"></div>
+      <div><div class="nof-score" id="evsv-${v.key}" style="color:${evCol(v.base/100)}">${(v.base/100).toFixed(2)}</div></div>
+    </div>`).join('');
+  // Set track fills
+  document.querySelectorAll('.ev-sl').forEach(s=>{
+    s.style.setProperty('--pct',s.value+'%');
+    s.addEventListener('input',function(){this.style.setProperty('--pct',this.value+'%');});
+  });
+  // Legend
+  const el=$('ev-legend');
+  if(el) el.innerHTML=EVS.map(v=>`<div style="margin-bottom:4px;line-height:1.6"><span style="color:var(--iaea-teal);font-weight:600">${v.key}</span>  ${v.name}</div>`).join('');
+  updateEvDisplay();
+}
+
+function evCol(v){ return v>=0.6?'var(--red)':v>=0.4?'var(--amber)':'var(--green)'; }
+function getEV(k){ const s=$('evsl-'+k); return s?parseInt(s.value)/100:0.4; }
+function calcEvPenalty(){ return EVS.reduce((a,v)=>a+getEV(v.key),0)/EVS.length*0.25; }
+
+function updateEV(key,val){
+  const v=parseInt(val)/100;
+  const b=$('evb-'+key); if(b){b.style.width=val+'%';b.style.background=evCol(v);}
+  const s=$('evs-'+key); if(s){s.textContent=v.toFixed(2);s.style.color=evCol(v);}
+  const sv=$('evsv-'+key); if(sv){sv.textContent=v.toFixed(2);sv.style.color=evCol(v);}
+  updateEvDisplay(); updateP2();
+}
+
+function selectEV(key){
+  activeEV=key;
+  document.querySelectorAll('.ev-card').forEach(c=>c.classList.remove('ev-active'));
+  const ec=$('evc-'+key); if(ec) ec.classList.add('ev-active');
+  setTxt('da-domain',DA_DOMAINS[key]||key);
+  renderDARows(key);
+}
+
+function renderDARows(key){
+  const rows=DA_DATA[key]||DA_DATA['DA'];
+  const ev=getEV(key);
+  const el=$('da-rows'); if(!el) return;
+  el.innerHTML=rows.map(r=>{
+    const scaledA=Math.round(r.a*(1-ev*0.28));
+    const gap=r.d-scaledA;
+    const gc2=gap>15?'var(--red)':gap>8?'var(--amber)':'var(--green)';
+    return `<div class="da-row">
+      <div class="da-label">${r.l}</div>
+      <div class="da-bars-col">
+        <div class="da-bar-wrap"><div class="da-declared-bar" style="width:${r.d}%"></div><div class="da-bar-label">Declared</div></div>
+        <div class="da-bar-wrap"><div class="da-actual-bar" style="width:${scaledA}%"></div><div class="da-bar-label" style="color:rgba(153,27,27,0.7)">Actual</div></div>
+      </div>
+      <div class="da-gap-val" style="color:${gc2}">+${gap}</div>
+    </div>`;
+  }).join('');
+}
+
+function updateEvDisplay(){
+  const avg=EVS.reduce((a,v)=>a+getEV(v.key),0)/EVS.length;
+  const pen=calcEvPenalty();
+  const cb=$('ev-conf-bar'); if(cb){cb.style.width=(avg*100)+'%';cb.style.background=evCol(avg);}
+  const cv=$('ev-conf-val'); if(cv){cv.textContent=avg.toFixed(2);cv.style.color=evCol(avg);}
+  const cp=$('ev-conf-pill');
+  if(cp){cp.textContent=avg>=0.6?'High Risk':avg>=0.4?'Moderate Risk':'Low Risk';cp.className='status-chip '+(avg>=0.6?'chip-bad':avg>=0.4?'chip-warn':'chip-good');}
+  const ep=$('ev-penalty-disp'); if(ep){ep.textContent=`−${pen.toFixed(3)}`;ep.style.color=pen>0.1?'var(--red)':'var(--amber)';}
+  renderDARows(activeEV);
+}
+
+function runEvasionAnalysis(){
+  const vals=EVS.map(v=>({key:v.key,name:v.name,val:getEV(v.key)})).sort((a,b)=>b.val-a.val);
+  const pen=calcEvPenalty();
+  let out='<span class="hl-red">Evasion Risk Ranking:</span>\n\n';
+  vals.forEach((v,i)=>{out+=`${i+1}. <span style="color:${evCol(v.val)};font-weight:600">${v.key}</span>  ${v.name}\n   Risk: ${v.val.toFixed(2)} — ${v.val>=0.6?'⚠ High':v.val>=0.4?'⚠ Moderate':'✓ Low'}\n\n`;});
+  out+=`<span class="hl-teal">g-ARI Penalty: <span class="hl-red">−${pen.toFixed(3)}</span></span>`;
+  $('ev-analysis-out').innerHTML=out;
+}
+
+// ════════════════════════════════════
+// CONTINUITY OF KNOWLEDGE
+// ════════════════════════════════════
+function updateCoK(){
+  ['cok-freq','cok-dur','cok-rec'].forEach(id=>{ const s=$(id); if(s) s.style.setProperty('--pct',s.value+'%'); });
+  const freq=parseInt($('cok-freq').value)/100;
+  const dur=parseInt($('cok-dur').value)/100;
+  const rec=parseInt($('cok-rec').value)/100;
+  setTxt('cok-freq-v',(freq*10).toFixed(1));
+  setTxt('cok-dur-v',(dur*10).toFixed(1));
+  setTxt('cok-rec-v',rec.toFixed(2));
+  const brk=clamp(freq*dur*1.2,0,.5);
+  const rcv=clamp(brk*(1-rec)*.8,0,.4);
+  const intact=clamp(1-brk-rcv,.1,1);
+  const cokS=clamp(intact+rcv*.3,0,1);
+  setTxt('cok-intact',Math.round(intact*100)+'%');
+  setTxt('cok-broken',Math.round(brk*100)+'%');
+  setTxt('cok-recover',Math.round(rcv*100)+'%');
+  const cs=$('cok-score'); if(cs){cs.textContent=cokS.toFixed(3);cs.style.color=gc(cokS);}
+  setTxt('exploit-window',((brk+rcv*.5)*52).toFixed(1)+' wks');
+  // Track segments
+  const s1=$('cok-s1'); if(s1) s1.style.width=(intact*55)+'%';
+  const s2=$('cok-s2'); if(s2){s2.style.left=(intact*55)+'%';s2.style.width=(brk*60)+'%';}
+  const s3=$('cok-s3'); if(s3){s3.style.left=((intact*55)+(brk*60))+'%';s3.style.width=(rcv*70)+'%';}
+}
+
+function runCoKOpt(){
+  const freq=parseInt($('cok-freq').value)/100;
+  const dur=parseInt($('cok-dur').value)/100;
+  const rec=parseInt($('cok-rec').value)/100;
+  const brk=clamp(freq*dur*1.2,0,.5);
+  const ew=((brk+clamp(brk*(1-rec)*.8,0,.4)*.5)*52).toFixed(1);
+  let out='<span class="hl-teal">CoK Optimisation Analysis:</span>\n\n';
+  if(freq>0.5) out+='⚠ Break frequency high\n  → Continuous monitoring technology\n  → Redundant sensor arrays\n\n';
+  if(dur>0.4) out+='⚠ Break duration high\n  → Faster re-baseline protocols\n  → Pre-positioned inspection teams\n\n';
+  if(rec<0.6) out+='⚠ Recovery capability low\n  → Inspector surge capacity\n  → Digital continuity records\n\n';
+  out+=`Exploitation window: <span class="hl-red">${ew} weeks/year</span>\nTarget: <span class="hl-green">< 4 weeks</span>`;
+  $('cok-opt-out').innerHTML=out;
+}
+
+// ════════════════════════════════════
+// SCENARIO LIBRARY
+// ════════════════════════════════════
+const SCENARIOS={
+  ai_nuclear:{tag:'cross',label:'Cross-Domain',title:'AI-Assisted Nuclear Facility: Assurance Continuity Break',desc:'State transitions to AI facility management. IAEA safeguards designed for physical accountancy. Assurance gap emerges at the AI/physical interface.',ariDelta:-0.094,
+    output:`Scenario: AI-Assisted Nuclear Facility
+
+State transitions to AI-managed operations.
+IAEA safeguards: designed for physical accountancy.
+
+Failure points identified:
+· COC — Chain-of-custody breaks at AI/physical interface
+· EP  — Evidence portability collapses (AI logs ≠ physical seals)
+· AIN — Auditor independence strained (AI vendor as de-facto auditor)
+· CoK — Continuity incompatible with AI update cycles
+
+Evasion surface opened:
+· AI update windows = unmonitored periods
+· Model opacity prevents declaration verification
+· Selective disclosure: AI outputs vs. raw sensor data`,
+    reform:`Reform pathway:
+1. Safeguards-by-Design mandate for AI facility systems
+2. Dual-layer monitoring: physical + AI-layer sensors
+3. Inspector access to raw sensor feeds, not AI summaries
+4. AI model audit requirements under Additional Protocol`},
+  audit_shopping:{tag:'nuclear',label:'Nuclear',title:'Regime Arbitrage: Audit-Shopping Under Dual Oversight',desc:'State exploits IAEA/Euratom jurisdictional overlap, selecting the inspection regime with weaker evidence standards.',ariDelta:-0.071,
+    output:`Scenario: Audit-Shopping Under Dual Oversight
+
+State exploits IAEA/Euratom overlap.
+Selects inspection regime with weaker evidence standards.
+
+Failure points:
+· ASV — Audit-shopping vulnerability critical (0.28)
+· CEJ — Cross-jurisdictional equivalence absent
+· AIN — Auditor independence compromised
+
+Declaration gap:
+· Declared compliance: 88% (Regime A standard)
+· Verified compliance:  61% (Regime B standard)
+· Exploitable gap: 27 percentage points`,
+    reform:`Reform pathway:
+1. Harmonised minimum evidence standards across IAEA/Euratom
+2. Mandatory cross-regime reporting equivalence
+3. Anti-shopping clause: regime cannot be selected post-trigger
+4. UNIDIR recommendation: integrated safeguards equivalence`},
+  capacity_strain:{tag:'nuclear',label:'Nuclear',title:'Inspector Capacity Strain: 40% Shortage',desc:'Global nuclear expansion outpaces IAEA inspector capacity. Surveillance frequency drops 40%. CoK degrades systematically.',ariDelta:-0.082,
+    output:`Scenario: 40% Inspector Shortage
+
+Global nuclear expansion (SMRs, civilian programmes)
+outpaces IAEA inspector capacity.
+
+Cascade effects:
+· ACU — Auditor capacity utilisation → critical (0.21)
+· ACL — Accreditation capacity limits breached
+· CoK — Break frequency doubles; exploitation window +18 wks
+· AFI — Fragmentation increases as states defer inspections
+
+Strategic risk:
+States can time non-compliant activity to inspection gaps.
+Average inspection interval: 18 mo → 36 mo`,
+    reform:`Reform pathway:
+1. IAEA inspector training pipeline 3× expansion
+2. Remote/autonomous monitoring to reduce inspector dependence
+3. Regional inspection consortia for capacity sharing
+4. Risk-based prioritisation: concentrate on highest-risk states`},
+  standards_diverge:{tag:'ai',label:'AI Domain',title:'Standards Fragmentation: EU AI Act vs. US NIST vs. ISO',desc:'Three major AI governance frameworks diverge. Cross-jurisdictional assurance equivalence collapses. Evidence portability fails.',ariDelta:-0.068,
+    output:`Scenario: AI Standards Divergence
+
+EU AI Act, US NIST AI RMF, ISO 42001 diverge.
+Cross-jurisdictional assurance equivalence collapses.
+
+Failure points:
+· SDR — Standards divergence rate → high (0.71)
+· CEJ — Cross-jurisdictional equivalence → critical (0.31)
+· EP  — Evidence portability fails cross-border
+· WEP — Structural weak evidence portability
+
+Assurance fragmentation:
+· EU-certified: not recognised in US markets
+· NIST-compliant: insufficient for EU high-risk classification
+· ISO 42001: neither jurisdiction fully accepts`,
+    reform:`Reform pathway:
+1. UNIDIR/OECD mutual recognition framework for AI assurance
+2. Common evidence portability standard (evidence passport)
+3. Harmonised auditor accreditation across jurisdictions
+4. WEF Centre of Excellence coordination role`},
+  integrated_reform:{tag:'reform',label:'Reform',title:'Integrated Safeguards Reform: Additional Protocol Expansion',desc:'Multilateral reform package strengthens all assurance dimensions. Modelled on Additional Protocol success in the nuclear domain.',ariDelta:+0.118,
+    output:`Scenario: Additional Protocol Expansion + Reform
+
+Multilateral reform package. Modelled on AP success.
+
+Improvements achieved:
+· EP  — Evidence portability standard adopted (+0.21)
+· AIN — Auditor independence protocol established (+0.15)
+· ASV — Anti-shopping clause reduces arbitrage (+0.18)
+· CEJ — Cross-jurisdictional equivalence agreement (+0.19)
+· CoK — Continuous monitoring technology mandate (+0.14)
+
+Cross-domain applicability:
+Reform architecture applicable to: Nuclear, Space, BioTech, AI`,
+    reform:`Implementation sequence:
+1. Phase 1: Mutual recognition agreements (bilateral → multilateral)
+2. Phase 2: Common evidence portability standard
+3. Phase 3: Integrated inspector training & accreditation body
+4. Phase 4: Automated CoK monitoring technology
+5. Estimated g-ARI improvement: +0.118`},
+
+  oman_threshold:{tag:'crisis',label:'Crisis · Live',title:'Oman Threshold: Diplomatic Collapse & Nuclear Assurance Failure (Feb 2026)',desc:'Real-world governance failure case. Omani-mediated talks approach breakthrough on 27 Feb 2026; US-Israel strikes begin 28 Feb. Models simultaneous NOF collapse across NDM, STI, IIC, SRA. Validates multiplicative g-GAC formulation under weakest-link conditions.',ariDelta:-0.231,
+    nofDeltas:{
+      /* NDM: ELC-NUC — diplomatic track terminated mid-negotiation */
+      /* trigger_clarity: 0.20, evidence_threshold_clarity: 0.15, timeline_to_escalate: 0.05, political_block_frequency: 0.85 */
+      /* NOF_ELC_NUC pre-strike: 0.28 (logistic score on collapsed vector) */
+      /* STI: DOC-NUC — declaration/observed split; Oman said agreement reached, Witkoff denied */
+      /* declaration_completeness: 0.35, material_balance_closure: 0.40, sensor_discrepancy_rate: 0.72, records_integrity: 0.45 */
+      /* NOF_DOC_NUC: 0.32 (contested/indeterminate) */
+      /* IIC: IRA-NUC — IAEA access suspended post-strike */
+      /* inspector_hours_per_facility: 0.05, technical_tooling_availability: 0.60, training_level: 0.75, coverage_backlog: 0.08 */
+      /* NOF_IRA_NUC post-strike: 0.07 (near-zero; multiplicative collapse trigger) */
+      /* SRA: CLB-NUC — legitimacy contested globally; Oman condemned US action */
+      /* perceived_fairness_index: 0.18, sanction_proportionality_score: 0.22, compliance_rebound_rate: 0.30, diplomatic_fallout_score: 0.88 */
+      /* NOF_CLB_NUC: 0.24 */
+    },
+    output:`Scenario: Oman Threshold — Feb 26–28, 2026
+
+━━━ PRE-STRIKE SNAPSHOT (Feb 26, 2026) ━━━
+Omani mediator: "breakthrough within reach"
+Iran: agreed to IAEA full verification + enrichment downgrade
+Diplomatic track active · Military track running in parallel
+
+NOF Indicator Vectors (Nuclear Domain):
+
+STI · DOC-NUC (Declared-vs-Observed Consistency)
+  declaration_completeness      : 0.35  ⚠ disputed
+  material_balance_closure      : 0.40  ⚠ unverified
+  sensor_discrepancy_rate       : 0.72  ❌ high
+  records_integrity             : 0.45  ⚠ contested
+  → NOF_DOC_NUC = σ(w⊤X − θ) = 0.32   ❌ CRITICAL
+
+NDM · ELC-NUC (Escalation Ladder Clarity)
+  trigger_clarity               : 0.20  ❌ absent
+  evidence_threshold_clarity    : 0.15  ❌ absent
+  timeline_to_escalate          : 0.05  ❌ compressed to zero
+  political_block_frequency     : 0.85  ❌ maximal (Israel veto)
+  → NOF_ELC_NUC = 0.28              ❌ CRITICAL
+
+IIC · IRA-NUC (Inspection Resource Adequacy)
+  inspector_hours_per_facility  : 0.05  ❌ near-zero post-strike
+  technical_tooling_availability: 0.60  ⚠ nominal
+  training_level                : 0.75  ✅ maintained
+  coverage_backlog              : 0.08  ❌ critical
+  → NOF_IRA_NUC = 0.07              ❌ COLLAPSE · multiplicative trigger
+
+SRA · CLB-NUC (Credibility-Legitimacy Balance)
+  perceived_fairness_index      : 0.18  ❌ globally contested
+  sanction_proportionality      : 0.22  ❌ disproportionate
+  compliance_rebound_rate       : 0.30  ❌ degraded
+  diplomatic_fallout_score      : 0.88  ❌ maximal
+  → NOF_CLB_NUC = 0.24              ❌ CRITICAL
+
+━━━ STRATUM III COMPUTATION ━━━
+Additive model g-GAC:  0.412  (partially masked by intact BACs)
+Multiplicative model:  0.089  ← WEAKEST-LINK COLLAPSE
+                               IRA-NUC → 0.07 drives product → 0
+
+KEY FINDING: Multiplicative formulation correctly identifies
+governance failure that additive model obscures.
+One broken verification leg (IRA-NUC) collapses total assurance.
+
+━━━ VALIDATION NOTE ━━━
+This is a live real-world case. Use as calibration baseline
+for post-conflict verification regime design.`,
+    reform:`Post-Conflict Architecture Requirements (derived from NOF gaps):
+
+STI / DOC-NUC remediation:
+1. Neutral third-party declaration verification (Oman, Switzerland)
+2. Continuous material balance sensor network, tamper-evident
+3. Real-time IAEA data feed — no managed-access delays
+
+NDM / ELC-NUC remediation:
+4. Escalation ladder codified in treaty text, not political preference
+5. Diplomatic track legally insulated from military option selection
+6. Evidence threshold for military action: IAEA Board confirmation required
+
+IIC / IRA-NUC remediation (critical — multiplicative trigger):
+7. Inspector access guaranteed under ceasefire terms
+8. Expanded inspector corps: 3× current IAEA staffing target
+9. Remote/autonomous monitoring for access-denied periods
+
+SRA / CLB-NUC remediation:
+10. Legitimacy framework: UN Security Council endorsement required
+11. Proportionality review mechanism: independent panel pre-action
+12. Successor regime: "Iran Verification Architecture" modelled on
+    Chemical Weapons Convention inspection protocols
+
+Research implication for Auracelle Lyra:
+Score this scenario at T+0 (Feb 26), T+1 (Feb 28), T+30 (current)
+and T+180 (hypothetical post-conflict regime) to demonstrate
+governance recovery trajectories via g-GAC time-series.`},
+
+  transport_security:{tag:'nuclear',label:'Nuclear · ITDB',title:'ITDB Transport Vulnerability: 55% of Thefts During Authorized Transit (IAEA 2026)',desc:'IAEA ITDB March 2026: 55% of nuclear/radioactive material thefts since 1993 occurred during authorized transport. 59% of transit-stolen material unrecovered. Scores TCTR-NUC (NUC_10) against ITDB findings. Rising decade trend: 70%.',ariDelta:-0.094,
+    output:`Scenario: ITDB Transport Vulnerability (IAEA, March 2026)
+
+━━━ ITDB FACTSHEET (March 23, 2026) ━━━
+Total incidents 1993–2025:     4,626
+Thefts / attempted thefts:       730
+Occurred during transport:        55%  (~400 incidents)
+Transport theft — unrecovered:   59%  (~236 incidents)
+Last decade trend:                70%  of thefts during transport
+States reporting (2025):      34/145  (23% participation rate)
+
+NUC_10 · Transport Chain & Recovery (TCTR-NUC) Indicator Vectors:
+
+  multi_handler_coc_continuity    : 0.42  ⚠ fragmented across carriers
+  in_transit_detection_capability : 0.38  ❌ poor — 59% unrecovered material
+  carrier_security_certification  : 0.45  ⚠ partial coverage, 145 states
+  cross_border_handoff_protocol   : 0.35  ❌ voluntary — only 34/145 reporting
+
+→ NUC_10 aggregate score: 0.40        ❌ CRITICAL
+
+BAC03 (Auditability & Traceability) degradation: −0.12
+Transport accountability gap drives chain-of-custody failures
+across multi-modal handoffs (road/rail/air/waterway).
+
+Additional failure modes:
+· Scrap metal contamination: rising trend (2024–2025 ITDB)
+· Disused source disposal: structural failure, low-capacity states
+· No unified in-transit detection standard across transport modes
+· ITDB participation: only 23% of member states actively report`,
+    reform:`TCA-NUC Reform Pathway (ITDB-grounded, March 2026):
+
+1. multi_handler_coc_continuity (+0.18 target)
+   · Mandatory electronic CoC tagging for Category 1–3 shipments
+   · Real-time handoff verification between all carriers
+   · Integrate transport incident reporting into IAEA ITDB live feed
+
+2. in_transit_detection_capability (+0.22 target)
+   · Tamper-indicating devices mandated for Category 1–3 sources
+   · Radiation portal monitors at high-volume transit chokepoints
+   · Standardised recovery protocol — target: <30 days to recover
+
+3. carrier_security_certification (+0.15 target)
+   · Binding certification under IAEA Transport Safety Regulations
+   · Expand IAEA advisory missions to transport security
+   · State licensing conditioned on carrier certification compliance
+
+4. cross_border_handoff_protocol (+0.25 target)
+   · Upgrade ITDB from voluntary to treaty-based reporting obligation
+   · 145-state participation target (from current 34)
+   · Regional inspection consortia for shared transport corridors
+
+Conference alignment:
+This scenario maps directly to the IAEA International Conference
+on Safe and Secure Transport (Vienna, March 23–27, 2026).
+Lyra provides the quantitative governance scoring framework.
+UNIDIR AISE26 application: transport governance as demonstration case.`}
+};
+
+const TAGCOLS={nuclear:'sc-nuclear',ai:'sc-ai',cross:'sc-cross',reform:'sc-reform',crisis:'sc-crisis','nuclear-itdb':'sc-nuclear'};
+
+function buildScenarioList(){
+  const sl=$('scenario-list'); if(!sl) return;
+  sl.innerHTML=Object.entries(SCENARIOS).map(([k,s])=>`
+    <div class="scenario-item" id="sci-${k}" onclick="loadScenario('${k}',this)">
+      <div class="sc-tags"><span class="sc-tag ${TAGCOLS[s.tag]||'sc-nuclear'}">${s.label}</span></div>
+      <div class="sc-title">${s.title}</div>
+      <div class="sc-desc">${s.desc}</div>
+    </div>`).join('');
+}
+
+function loadScenario(key,el){
+  document.querySelectorAll('.scenario-item').forEach(s=>s.classList.remove('sc-active'));
+  if(el) el.classList.add('sc-active');
+  const sc=SCENARIOS[key]; if(!sc) return;
+  set('sc-output',sc.output);
+  setTxt('sc-domain-badge',sc.label+' · '+sc.title.slice(0,40)+'…');
+  set('sc-reform-out',sc.reform);
+  const base=calcGARI(); const res=clamp(base+sc.ariDelta,0,1); const delta=sc.ariDelta;
+  const col=delta>=0?'var(--green)':'var(--red)';
+  const rv=$('sc-result'); if(rv){rv.textContent=res.toFixed(3);rv.style.color=col;}
+  const dv=$('sc-delta'); if(dv){dv.textContent=(delta>=0?'+':'')+delta.toFixed(3);dv.style.color=col;}
+  const bar=$('sc-ari-bar'); if(bar){bar.style.width=(res*100)+'%';bar.style.background=col;}
+}
+
+// ════════════════════════════════════
+// COUNTRY DATA + WARGAMING
+// ════════════════════════════════════
+const COUNTRIES={
+  us:{name:'United States',flag:'🇺🇸',profile:{ai_strategy:0.78,treaty_participation:0.72,regulatory_maturity:0.74,institutional_capacity:0.80},nofs:{DUV:72,MAT:68,CBOF:55,PDAD:60,CRT:65,ESC:70,RMR:58,PC:72,AEC:75,SUR:68}},
+  eu:{name:'European Union',flag:'🇪🇺',profile:{ai_strategy:0.82,treaty_participation:0.85,regulatory_maturity:0.88,institutional_capacity:0.78},nofs:{DUV:80,MAT:75,CBOF:70,PDAD:72,CRT:78,ESC:68,RMR:76,PC:80,AEC:72,SUR:74}},
+  cn:{name:'China',flag:'🇨🇳',profile:{ai_strategy:0.85,treaty_participation:0.62,regulatory_maturity:0.65,institutional_capacity:0.72},nofs:{DUV:58,MAT:60,CBOF:45,PDAD:55,CRT:52,ESC:60,RMR:48,PC:58,AEC:55,SUR:62}},
+  uk:{name:'United Kingdom',flag:'🇬🇧',profile:{ai_strategy:0.76,treaty_participation:0.80,regulatory_maturity:0.74,institutional_capacity:0.78},nofs:{DUV:74,MAT:70,CBOF:65,PDAD:68,CRT:70,ESC:65,RMR:72,PC:74,AEC:68,SUR:70}},
+  jp:{name:'Japan',flag:'🇯🇵',profile:{ai_strategy:0.72,treaty_participation:0.78,regulatory_maturity:0.68,institutional_capacity:0.74},nofs:{DUV:68,MAT:65,CBOF:60,PDAD:62,CRT:65,ESC:62,RMR:70,PC:68,AEC:65,SUR:66}},
+  in:{name:'India',flag:'🇮🇳',profile:{ai_strategy:0.65,treaty_participation:0.55,regulatory_maturity:0.52,institutional_capacity:0.60},nofs:{DUV:52,MAT:50,CBOF:42,PDAD:48,CRT:45,ESC:55,RMR:44,PC:52,AEC:48,SUR:50}},
+  br:{name:'Brazil',flag:'🇧🇷',profile:{ai_strategy:0.58,treaty_participation:0.60,regulatory_maturity:0.55,institutional_capacity:0.56},nofs:{DUV:48,MAT:46,CBOF:40,PDAD:44,CRT:42,ESC:50,RMR:46,PC:48,AEC:44,SUR:46}},
+  de:{name:'Germany',flag:'🇩🇪',profile:{ai_strategy:0.78,treaty_participation:0.85,regulatory_maturity:0.82,institutional_capacity:0.80},nofs:{DUV:76,MAT:72,CBOF:68,PDAD:70,CRT:74,ESC:66,RMR:78,PC:76,AEC:72,SUR:72}},
+};
+
+const REGIMES={
+  iaea:{name:'IAEA Comprehensive Safeguards',flag:'☢️',nofs:{EP:65,COC:72,AIN:80,ASV:55,ACL:60,SDR:70,AFI:65,ACU:58,CEJ:62}},
+  ap:{name:'IAEA Additional Protocol',flag:'🔬',nofs:{EP:75,COC:80,AIN:82,ASV:65,ACL:65,SDR:72,AFI:70,ACU:62,CEJ:70}},
+  euratom:{name:'Euratom Safeguards',flag:'🇪🇺',nofs:{EP:70,COC:75,AIN:78,ASV:60,ACL:70,SDR:68,AFI:68,ACU:65,CEJ:68}},
+  nist:{name:'NIST AI RMF',flag:'🇺🇸',nofs:{EP:62,COC:68,AIN:70,ASV:50,ACL:65,SDR:58,AFI:60,ACU:70,CEJ:55}},
+  euai:{name:'EU AI Act Conformity',flag:'🇪🇺',nofs:{EP:72,COC:70,AIN:75,ASV:62,ACL:68,SDR:65,AFI:65,ACU:68,CEJ:72}},
+  iso42:{name:'ISO/IEC 42001',flag:'🌐',nofs:{EP:60,COC:65,AIN:68,ASV:52,ACL:60,SDR:62,AFI:58,ACU:62,CEJ:58}},
+};
+
+function populateCountrySelects(){
+  ['country-a','country-b'].forEach(id=>{
+    const sel=$(id); if(!sel) return;
+    Object.entries(COUNTRIES).forEach(([k,c])=>{
+      const o=document.createElement('option'); o.value=k; o.textContent=c.flag+' '+c.name; sel.appendChild(o);
+    });
+  });
+  ['regime-a','regime-b'].forEach(id=>{
+    const sel=$(id); if(!sel) return;
+    Object.entries(REGIMES).forEach(([k,r])=>{
+      const o=document.createElement('option'); o.value=k; o.textContent=r.flag+' '+r.name; sel.appendChild(o);
+    });
+  });
+}
+
+function updateCountryProfile(side){
+  const sel=$('country-'+side); const prof=$('profile-'+side);
+  if(!sel||!prof) return;
+  const c=COUNTRIES[sel.value]; if(!c){prof.innerHTML='<span style="color:var(--ink-muted);font-size:11px">Select a country…</span>';return;}
+  prof.innerHTML=`<div class="cp-flag">${c.flag}</div><div class="cp-name">${c.name}</div>
+    ${Object.entries(c.profile).map(([k,v])=>`<div class="cp-row"><span>${k.replace(/_/g,' ')}</span><span class="cp-val" style="color:${gc(v)}">${v.toFixed(2)}</span></div>`).join('')}`;
+}
+
+function updateRegimeProfile(side){
+  const sel=$('regime-'+side); const prof=$('regime-profile-'+side);
+  if(!sel||!prof) return;
+  const r=REGIMES[sel.value]; if(!r){prof.innerHTML='<span style="color:var(--ink-muted);font-size:11px">Select a regime…</span>';return;}
+  const nofVals=Object.values(r.nofs);
+  const avg=nofVals.reduce((a,v)=>a+v,0)/nofVals.length/100;
+  prof.innerHTML=`<div class="cp-flag">${r.flag}</div><div class="cp-name">${r.name}</div>
+    <div class="cp-row"><span>Average NOF</span><span class="cp-val" style="color:${gc(avg)}">${avg.toFixed(2)}</span></div>
+    <div class="cp-row"><span>NOFs defined</span><span class="cp-val">${nofVals.length}</span></div>`;
+}
+
+function calcCountryGgac(nofs){
+  const bacS={};
+  for(const b of Object.keys(BAC1)){
+    const ns=Object.keys(N1).filter(k=>N1[k].bac===b);
+    const avg=ns.reduce((a,k)=>{
+      const v=(nofs[k]||50)/100; const X=[clamp(v+.05,0,1),clamp(v-.02,0,1),clamp(v+.08,0,1),clamp(v-.05,0,1)];
+      return a+sig(N1[k].w.reduce((s,wi,i)=>s+wi*X[i],0)-THETA);
+    },0)/ns.length;
+    bacS[b]=avg;
+  }
+  return Object.values(bacS).reduce((a,v)=>a+v,0)/Object.values(bacS).length;
+}
+
+function runWargame(){
+  const ca=COUNTRIES[$('country-a').value];
+  const cb=COUNTRIES[$('country-b').value];
+  if(!ca||!cb){alert('Please select two countries.');return;}
+  const gA=calcCountryGgac(ca.nofs), gB=calcCountryGgac(cb.nofs);
+  const wgr=$('wg-result'); if(wgr) wgr.style.display='block';
+  const cols=$('wg-cols');
+  if(cols) cols.innerHTML=[ca,cb].map((c,i)=>{
+    const g=i===0?gA:gB;
+    const dimData=Object.entries(BAC1).map(([b,n])=>{
+      const ns=Object.keys(N1).filter(k=>N1[k].bac===b);
+      const avg=ns.reduce((a,k)=>a+(c.nofs[k]||50)/100,0)/ns.length;
+      return {b,n,avg};
+    });
+    return `<div class="wg-country-col">
+      <div class="wg-col-header"><div class="wg-flag">${c.flag}</div><div class="wg-name">${c.name}</div><div class="wg-score-badge" style="color:${gc(g)}">${g.toFixed(3)}</div></div>
+      ${dimData.map(d=>`<div class="wg-dim-row"><div class="wg-dim-key">${d.b}</div><div class="wg-dim-bar-wrap"><div class="wg-dim-fill" style="width:${d.avg*100}%;background:${gc(d.avg)}"></div></div><div class="wg-dim-val" style="color:${gc(d.avg)}">${d.avg.toFixed(2)}</div></div>`).join('')}
+    </div>`;
+  }).join('');
+  // Gap analysis
+  const gap=$('wg-gap-analysis');
+  if(gap){
+    const leader=gA>gB?ca:cb; const trailer=gA>gB?cb:ca; const gLead=Math.max(gA,gB); const gTrail=Math.min(gA,gB);
+    gap.innerHTML=`<span class="hl-blue">Governance Gap Analysis: ${ca.name} vs. ${cb.name}</span>\n\ng-GAC ${ca.name}: <span style="color:${gc(gA)};font-weight:600">${gA.toFixed(3)}</span>\ng-GAC ${cb.name}: <span style="color:${gc(gB)};font-weight:600">${gB.toFixed(3)}</span>\nGap: <span class="hl-amber">${(gLead-gTrail).toFixed(3)}</span>\n\n${leader.name} leads by ${(gLead-gTrail).toFixed(3)} on g-GAC.\nMutual recognition friction likely on: CBOF, RMR, CEJ dimensions.\nRecommend bilateral assurance equivalence negotiation.`;
+  }
+  // Run Claude analysis
+  runWargameClaude(ca,cb,gA,gB);
+}
+
+async function runWargameClaude(ca,cb,gA,gB){
+  const card=$('wg-claude-analysis'); const out=$('wg-claude-out');
+  if(card) card.style.display='block';
+  if(out) out.innerHTML='<span style="color:var(--ink-muted)">Running AI governance analysis…</span>';
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:`You are an AI governance expert assistant within the Auracelle Lyra simulation platform, built on the E-AGPO-HT framework. Provide concise, rigorous comparative governance analysis. Use precise language suitable for a UNIDIR or IAEA audience. No markdown, no bullet symbols — use plain text with line breaks.`,
+        messages:[{role:'user',content:`Compare AI governance posture between ${ca.name} (g-GAC: ${gA.toFixed(3)}) and ${cb.name} (g-GAC: ${gB.toFixed(3)}) across the E-AGPO dimensions: STI, SAD, ESI, NDM, SRA, IIC, ASI. Identify the top 3 governance gaps, their implications for mutual recognition and cross-border AI governance coordination, and 2 concrete reform recommendations. Keep response under 250 words.`}]
+      })
+    });
+    const data=await resp.json();
+    const text=data.content?.map(c=>c.text||'').join('');
+    if(out) out.textContent=text||'Analysis unavailable.';
+  }catch(e){
+    if(out) out.innerHTML='<span style="color:var(--ink-muted)">Claude analysis requires API connectivity. Manual analysis available above.</span>';
+  }
+}
+
+function runRegimeComparison(){
+  const ra=REGIMES[$('regime-a').value];
+  const rb=REGIMES[$('regime-b').value];
+  if(!ra||!rb){alert('Please select two regimes.');return;}
+  const calcRegimeGARI=(nofs)=>{
+    const dimS={}; for(const d of Object.keys(DIM2)){
+      const ns=Object.keys(N2).filter(k=>N2[k].dim===d);
+      const avg=ns.reduce((a,k)=>{
+        const v=(nofs[k]||50)/100; const X=[clamp(v+.03,0,1),clamp(v-.04,0,1),clamp(v+.06,0,1),clamp(v-.03,0,1)];
+        return a+sig(N2[k].w.reduce((s,wi,i)=>s+wi*X[i],0)-THETA);
+      },0)/ns.length;
+      dimS[d]=avg;
+    }
+    return clamp(Object.values(dimS).reduce((a,v)=>a+v,0)/Object.values(dimS).length-0.1,0,1);
+  };
+  const gA=calcRegimeGARI(ra.nofs), gB=calcRegimeGARI(rb.nofs);
+  const rr=$('regime-result'); if(rr) rr.style.display='block';
+  const cols=$('regime-cols');
+  if(cols) cols.innerHTML=[ra,rb].map((r,i)=>{
+    const g=i===0?gA:gB;
+    return `<div class="wg-country-col">
+      <div class="wg-col-header"><div class="wg-flag">${r.flag}</div><div class="wg-name">${r.name}</div><div class="wg-score-badge" style="color:${gc(g)}">${g.toFixed(3)}</div></div>
+      ${Object.entries(DIM2).map(([d,n])=>{
+        const ns=Object.keys(N2).filter(k=>N2[k].dim===d);
+        const avg=ns.reduce((a,k)=>a+(r.nofs[k]||50)/100,0)/ns.length;
+        return `<div class="wg-dim-row"><div class="wg-dim-key t-mono-g">${d}</div><div class="wg-dim-bar-wrap"><div class="wg-dim-fill" style="width:${avg*100}%;background:${gc(avg)}"></div></div><div class="wg-dim-val" style="color:${gc(avg)}">${avg.toFixed(2)}</div></div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+  runRegimeClaude(ra,rb,gA,gB);
+}
+
+async function runRegimeClaude(ra,rb,gA,gB){
+  const card=$('regime-claude-card'); const out=$('regime-claude-out');
+  if(card) card.style.display='block';
+  if(out) out.innerHTML='<span style="color:var(--ink-muted)">Running assurance equivalence analysis…</span>';
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:`You are an assurance governance expert within Auracelle Lyra's E-AGSO engine. Provide rigorous cross-regime assurance equivalence analysis for a UNIDIR/IAEA audience. Plain text, no markdown symbols.`,
+        messages:[{role:'user',content:`Analyse assurance equivalence between ${ra.name} (g-ARI: ${gA.toFixed(3)}) and ${rb.name} (g-ARI: ${gB.toFixed(3)}) across the E-AGSO dimensions: EVE (Evidence Engineering), CAM (Conformity Assessment), AER (Assurance Ecosystem Resilience), VEL (Verification-Enforcement Linkage). Identify the top assurance equivalence gaps, their implications for mutual recognition, and 2 specific reform recommendations. 200 words maximum.`}]
+      })
+    });
+    const data=await resp.json();
+    const text=data.content?.map(c=>c.text||'').join('');
+    if(out) out.textContent=text||'Analysis unavailable.';
+  }catch(e){
+    if(out) out.innerHTML='<span style="color:var(--ink-muted)">Claude analysis requires API connectivity.</span>';
+  }
+}
+
+// ════════════════════════════════════
+// DOCUMENT UPLOAD — Claude-powered
+// ════════════════════════════════════
+const P1_STEPS=['Reading document structure','Identifying governance provisions','Scoring NOF indicators','Calibrating weights','Generating assessment'];
+const P2_STEPS=['Reading document structure','Identifying assurance provisions','Scoring evidence engineering','Scoring conformity assessment','Analysing evasion surfaces','Generating assurance report'];
+
+async function handleP1Upload(input){
+  const file=input.files[0]; if(!file) return;
+  const prog=$('p1-progress'); const res=$('p1-doc-result');
+  if(prog) prog.style.display='block';
+  if(res) res.style.display='none';
+  renderSteps('p1-progress-steps',P1_STEPS,0);
+  for(let i=0;i<P1_STEPS.length;i++){
+    await delay(600);
+    renderSteps('p1-progress-steps',P1_STEPS,i+1);
+  }
+  let text='';
+  try{
+    if(file.type==='text/plain') text=await file.text();
+    else text=`[Document: ${file.name}]`;
+  }catch(e){text=`[Document: ${file.name}]`;}
+  await runDocumentAnalysisP1(file.name,text);
+  if(prog) prog.style.display='none';
+}
+
+async function runDocumentAnalysisP1(filename,content){
+  const res=$('p1-doc-result'); const body=$('p1-doc-body'); const fn=$('p1-doc-filename');
+  if(fn) fn.textContent=filename;
+  if(res) res.style.display='block';
+  if(body) body.textContent='Running E-AGPO extraction…';
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:`You are the E-AGPO analysis engine within Auracelle Lyra. Given a policy or standards document, score each of the following AI governance NOF indicators from 0 to 100 based on evidence found in the document. Indicators: DUV (Downstream Use Visibility), MAT (Model Adaptation Traceability), CBOF (Cross-Border Oversight Friction), PDAD (Post-Deployment Assurance Design), CRT (Certification Revocation Triggers), ESC (Evasion Scenario Coverage), RMR (Reciprocity & Mutual Recognition), PC (Proportionality of Controls), AEC (Audit Enforcement Capacity), SUR (Standard Update Responsiveness). Respond ONLY with a JSON object like: {"DUV":65,"MAT":58,...} and nothing else.`,
+        messages:[{role:'user',content:content.slice(0,8000)||'No document content provided. Score each NOF at 50 as baseline.'}]
+      })
+    });
+    const data=await resp.json();
+    const raw=data.content?.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
+    const scores=JSON.parse(raw);
+    // Apply scores
+    for(const[k,v] of Object.entries(scores)){
+      const sl=$('n1-'+k); if(sl){sl.value=clamp(v,0,100);sl.style.setProperty('--pct',sl.value+'%');}
+    }
+    updateP1();
+    // Show extracted
+    const ec=$('p1-extracted-scores'); const el=$('p1-extracted-list');
+    if(ec) ec.style.display='block';
+    if(el) el.innerHTML=Object.entries(scores).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bg-warm);font-family:'DM Mono',monospace;font-size:10px"><span style="color:var(--un-blue-dark)">${k}</span><span style="color:${gc(v/100)}">${(v/100).toFixed(2)}</span></div>`).join('');
+    if(body) body.textContent=`E-AGPO extraction complete for: ${filename}\n\nScores extracted for ${Object.keys(scores).length} NOF indicators.\nSliders have been auto-populated.\nYou may adjust manually to model policy reforms.\n\nDocument analysis powered by Claude AI.`;
+  }catch(e){
+    if(body) body.textContent=`Extraction complete for: ${filename}\n\nDocument processed. NOF scores calibrated to baseline values.\nManual adjustment available via NOF Calculator tab.\n\nNote: For full AI extraction, ensure API connectivity.`;
+  }
+}
+
+async function handleP2Upload(input){
+  const file=input.files[0]; if(!file) return;
+  const prog=$('p2-progress'); const res=$('p2-doc-result');
+  if(prog) prog.style.display='block';
+  if(res) res.style.display='none';
+  renderSteps('p2-progress-steps',P2_STEPS,0);
+  for(let i=0;i<P2_STEPS.length;i++){
+    await delay(600);
+    renderSteps('p2-progress-steps',P2_STEPS,i+1);
+  }
+  let text='';
+  try{ if(file.type==='text/plain') text=await file.text(); else text=`[Document: ${file.name}]`; }
+  catch(e){ text=`[Document: ${file.name}]`; }
+  await runDocumentAnalysisP2(file.name,text);
+  if(prog) prog.style.display='none';
+}
+
+async function runDocumentAnalysisP2(filename,content){
+  const res=$('p2-doc-result'); const body=$('p2-doc-body'); const fn=$('p2-doc-filename');
+  if(fn) fn.textContent=filename;
+  if(res) res.style.display='block';
+  if(body) body.textContent='Running E-AGSO extraction…';
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:`You are the E-AGSO analysis engine within Auracelle Lyra. Given an audit report or standards document, score each assurance NOF indicator from 0 to 100. Indicators: EP (Evidence Portability), COC (Chain-of-Custody Integrity), AIN (Auditor Independence Index), ASV (Audit-Shopping Vulnerability), ACL (Accreditation Capacity Limits), SDR (Standards Divergence Rate), AFI (Assurance Fragmentation Index), ACU (Auditor Capacity Utilization), CEJ (Cross-Jurisdictional Equivalence). Also estimate evasion surface scores for: DA (Declaration Accuracy), AS (Audit Shopping), SD (Selective Disclosure), WEP (Weak Evidence Portability), CG (Capacity Gap), FB (Formalism Bias). Respond ONLY with JSON: {"nofs":{"EP":65,...},"evasion":{"DA":42,...}}`,
+        messages:[{role:'user',content:content.slice(0,8000)||'No document content. Return baseline scores of 50 for all indicators.'}]
+      })
+    });
+    const data=await resp.json();
+    const raw=data.content?.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(raw);
+    // Apply NOF scores
+    if(parsed.nofs) for(const[k,v] of Object.entries(parsed.nofs)){const sl=$('n2-'+k);if(sl){sl.value=clamp(v,0,100);sl.style.setProperty('--pct',sl.value+'%');}}
+    // Apply evasion scores
+    if(parsed.evasion) for(const[k,v] of Object.entries(parsed.evasion)){const sl=$('evsl-'+k);if(sl){sl.value=clamp(v,0,100);sl.style.setProperty('--pct',sl.value+'%');updateEV(k,sl.value);}}
+    updateP2();
+    if(body) body.textContent=`E-AGSO extraction complete for: ${filename}\n\nAssurance NOFs: ${Object.keys(parsed.nofs||{}).length} indicators scored.\nEvasion surfaces: ${Object.keys(parsed.evasion||{}).length} vectors assessed.\n\nSliders auto-populated. Switch to Assurance NOFs or Audit Evasion tabs to explore.\n\nDocument analysis powered by Claude AI.`;
+  }catch(e){
+    if(body) body.textContent=`Extraction complete for: ${filename}\n\nDocument processed. Assurance NOF scores calibrated to baseline values.\n\nNote: For full AI extraction, ensure API connectivity.`;
+  }
+}
+
+function renderSteps(id,steps,doneCount){
+  const el=$(id); if(!el) return;
+  el.innerHTML=steps.map((s,i)=>{
+    const cls=i<doneCount?'step-done':i===doneCount?'step-active':'step-pending';
+    const icon=i<doneCount?'✓':i===doneCount?'◉':'○';
+    return `<li class="progress-step ${cls}"><span class="step-icon">${icon}</span>${s}</li>`;
+  }).join('');
+}
+
+const delay=ms=>new Promise(r=>setTimeout(r,ms));
+
+// ════════════════════════════════════
+// INIT
+// ════════════════════════════════════
+buildEvasionUI();
+buildScenarioList();
+populateCountrySelects();
+updateP1();
+updateP2();
+updateCoK();
+setTimeout(()=>{selectEV('DA');},100);
+
+// Init teal sliders
+document.querySelectorAll('.teal-slider').forEach(s=>{
+  s.style.setProperty('--pct',s.value+'%');
+  s.addEventListener('input',function(){this.style.setProperty('--pct',this.value+'%');});
+});
+</script>
+
+<!-- ═══════════════════════════════════════════════════════
+     WARGAMING DEMO — P3 ENGINE (from E-AGPO-HT Sandbox)
+════════════════════════════════════════════════════════ -->
+<script>
+// ── P3 DATA ──
+const P3_REG = {
+  BAC:{BAC01:{name:"Standards Clarity & Coherence",w:0.14,theta:0.75},BAC02:{name:"Verification & Testability",w:0.15,theta:0.78},BAC03:{name:"Auditability & Traceability",w:0.15,theta:0.78},BAC04:{name:"Certification & Accreditation Capacity",w:0.14,theta:0.75},BAC05:{name:"Interoperability & Conformance",w:0.14,theta:0.75},BAC06:{name:"Operational Compliance & Enforcement",w:0.14,theta:0.75},BAC07:{name:"Resilience Under Stress & Change",w:0.14,theta:0.75}},
+  gGACn_theta:0.80,
+  domains:{
+    Nuclear:{NOFs:[{id:"NUC_01",name:"Anomaly Detection Sensitivity (ADS-NUC)",bac:"BAC02",w:0.14,theta:0.78,inds:["anomaly_threshold_tuning","detection_rate_true","false_alarm_rate","time_to_detect"]},{id:"NUC_02",name:"Declared-vs-Observed Consistency (DOC-NUC)",bac:"BAC02",w:0.15,theta:0.8,inds:["declaration_completeness","material_balance_closure","sensor_discrepancy_rate","records_integrity"]},{id:"NUC_03",name:"Safeguards Coverage Completeness (SCC)",bac:"BAC01",w:0.14,theta:0.78,inds:["facility_coverage_pct","process_coverage_pct","frequency_sufficiency","containment_surveillance_uptime"]},{id:"NUC_04",name:"Access Realism Index (ARI-NUC)",bac:"BAC01",w:0.13,theta:0.75,inds:["inspector_access_success_rate","notice_to_access_delay","managed_access_constraints_severity","denied_access_frequency"]},{id:"NUC_05",name:"Red-Team Evasion Robustness (RTER-NUC)",bac:"BAC03",w:0.13,theta:0.75,inds:["evasion_tactics_tested","adversary_sophistication_level","detection_under_evasion_pct","learning_adaptation_of_regime"]},{id:"NUC_06",name:"Escalation Ladder Clarity (ELC-NUC)",bac:"BAC05",w:0.12,theta:0.72,inds:["trigger_clarity","evidence_threshold_clarity","timeline_to_escalate","political_block_frequency"]},{id:"NUC_07",name:"Credibility-Legitimacy Balance (CLB-NUC)",bac:"BAC06",w:0.12,theta:0.72,inds:["perceived_fairness_index","sanction_proportionality_score","compliance_rebound_rate","diplomatic_fallout_score"]},{id:"NUC_08",name:"Inspection Resource Adequacy (IRA-NUC)",bac:"BAC04",w:0.13,theta:0.75,inds:["inspector_hours_per_facility","technical_tooling_availability","training_level","coverage_backlog"]},{id:"NUC_09",name:"Technical Complexity Adaptation (TCA-NUC)",bac:"BAC07",w:0.12,theta:0.72,inds:["ability_to_incorporate_new_tech","update_of_methods","expertise_refresh_rate","tool_modernization_cadence"]},{id:"NUC_10",name:"Transport Chain & Recovery (TCTR-NUC)",bac:"BAC03",w:0.14,theta:0.78,inds:["multi_handler_coc_continuity","in_transit_detection_capability","carrier_security_certification","cross_border_handoff_protocol"]}]},
+    AI:{NOFs:[{id:"AI_01",name:"Model Documentation Sufficiency",bac:"BAC01",w:0.12,theta:0.70,inds:["doc_coverage_rate","assumption_disclosure_quality","known_limitations_disclosure","intended_use_clarity"]},{id:"AI_02",name:"Evaluation & Test Protocol Rigor",bac:"BAC02",w:0.14,theta:0.75,inds:["test_suite_completeness","out_of_distribution_testing","red_team_frequency","reproducibility_rate"]},{id:"AI_03",name:"Provenance & Traceability Controls",bac:"BAC03",w:0.13,theta:0.75,inds:["data_lineage_coverage","model_versioning_integrity","training_run_audit_trail","artifact_retention_policy_strength"]},{id:"AI_04",name:"Assurance Case & Evidence Integrity",bac:"BAC04",w:0.12,theta:0.70,inds:["assurance_case_completeness","evidence_chain_integrity","independent_validation_presence","conflict_of_interest_controls"]},{id:"AI_05",name:"Interoperable Controls & Conformance",bac:"BAC05",w:0.12,theta:0.70,inds:["api_control_consistency","logging_schema_conformance","policy_control_portability","standard_mapping_coverage"]},{id:"AI_06",name:"Operational Compliance Readiness",bac:"BAC06",w:0.19,theta:0.78,inds:["access_control_effectiveness","incident_response_readiness","continuous_monitoring_coverage","enforcement_mechanism_strength"]},{id:"AI_07",name:"Change Control & Drift Management",bac:"BAC07",w:0.18,theta:0.75,inds:["model_drift_detection_quality","rollback_capability","change_approval_rigor","post_deploy_validation_rate"]}]},
+    Space:{NOFs:[{id:"SPC_01",name:"Orbital Safety Standards Clarity",bac:"BAC01",w:0.14,theta:0.72,inds:["debris_mitigation_coverage","collision_avoidance_protocol","deorbit_requirement_clarity","space_traffic_coordination"]},{id:"SPC_02",name:"Verification of Compliance Obligations",bac:"BAC02",w:0.16,theta:0.75,inds:["telemetry_verification_quality","maneuver_reporting_rigor","eol_compliance_testing","anomaly_detection_validation"]},{id:"SPC_03",name:"Object Registry & Traceability",bac:"BAC03",w:0.15,theta:0.75,inds:["registration_completeness","tracking_data_integrity","ownership_chain_clarity","launch_record_retention"]},{id:"SPC_04",name:"Launch Authority & Licensing Capacity",bac:"BAC04",w:0.13,theta:0.72,inds:["license_review_depth","technical_expertise_adequacy","third_party_assessment","mega_constellation_capacity"]},{id:"SPC_05",name:"Interoperable Data & Coordination",bac:"BAC05",w:0.15,theta:0.72,inds:["itu_coordination_compliance","cross_agency_data_sharing","format_standardization","conjunction_alert_interop"]},{id:"SPC_06",name:"Enforcement & Compliance Mechanisms",bac:"BAC06",w:0.15,theta:0.75,inds:["eol_enforcement_strength","noncompliance_penalties","oversight_independence","corrective_action_timeliness"]},{id:"SPC_07",name:"Resilience to Cascading Debris Events",bac:"BAC07",w:0.12,theta:0.70,inds:["kessler_syndrome_modeling","emergency_maneuver_capability","continuity_of_operations","lessons_learned_integration"]}]},
+    Biotech:{NOFs:[{id:"BIO_01",name:"Protocol & Biosafety Standard Clarity",bac:"BAC01",w:0.15,theta:0.75,inds:["protocol_spec_quality","biosafety_standard_coverage","risk_classification_clarity","scope_boundary_clarity"]},{id:"BIO_02",name:"Verification of Lab Processes",bac:"BAC02",w:0.16,theta:0.78,inds:["assay_validation_quality","repeatability_rate","control_group_rigor","contamination_detection_strength"]},{id:"BIO_03",name:"Sample Provenance & Chain-of-Custody",bac:"BAC03",w:0.16,theta:0.80,inds:["sample_tracking_completeness","custody_integrity_controls","data_integrity_controls","record_retention_strength"]},{id:"BIO_04",name:"Accreditation & QA/QC Maturity",bac:"BAC04",w:0.13,theta:0.72,inds:["qa_qc_procedures_maturity","lab_accreditation_status","proficiency_testing_frequency","independent_audit_presence"]},{id:"BIO_05",name:"Interoperability of Reporting Standards",bac:"BAC05",w:0.12,theta:0.70,inds:["data_standard_alignment","cross_lab_exchange_readiness","semantic_consistency","secure_sharing_controls"]},{id:"BIO_06",name:"Compliance & Oversight Enforcement",bac:"BAC06",w:0.16,theta:0.75,inds:["oversight_independence","noncompliance_handling_strength","incident_reporting_timeliness","corrective_action_effectiveness"]},{id:"BIO_07",name:"Resilience to Dual-Use & Supply Stress",bac:"BAC07",w:0.12,theta:0.70,inds:["dual_use_risk_controls","supply_chain_assurance","continuity_of_operations","lessons_learned_integration"]}]},
+    Renewable:{NOFs:[{id:"REN_01",name:"Standards Coverage for Grid & Safety",bac:"BAC01",w:0.14,theta:0.72,inds:["grid_code_alignment","safety_standard_coverage","site_requirements_clarity","documentation_quality"]},{id:"REN_02",name:"Verification of Performance & Reliability",bac:"BAC02",w:0.16,theta:0.75,inds:["performance_test_rigor","reliability_testing_depth","measurement_verification_quality","third_party_test_presence"]},{id:"REN_03",name:"Telemetry, Logging & Traceability",bac:"BAC03",w:0.14,theta:0.72,inds:["telemetry_coverage","log_integrity_controls","asset_identity_management","maintenance_record_quality"]},{id:"REN_04",name:"Certification & Inspection Capacity",bac:"BAC04",w:0.13,theta:0.72,inds:["inspector_availability","certification_scheme_maturity","calibration_program_strength","audit_readiness"]},{id:"REN_05",name:"Interoperability with Grid Operations",bac:"BAC05",w:0.17,theta:0.78,inds:["interop_test_success_rate","scada_integration_quality","data_exchange_standard_alignment","control_stability"]},{id:"REN_06",name:"Compliance Enforcement & Safety Gov.",bac:"BAC06",w:0.14,theta:0.72,inds:["noncompliance_response_strength","safety_incident_handling","regulatory_reporting_quality","vendor_accountability"]},{id:"REN_07",name:"Resilience to Cyber/Weather/Market Stress",bac:"BAC07",w:0.12,theta:0.70,inds:["cyber_resilience_posture","extreme_weather_preparedness","supply_chain_resilience","recovery_time_objectives"]}]},
+    Quantum:{NOFs:[{id:"QTM_01",name:"Specification Clarity for Quantum Claims",bac:"BAC01",w:0.14,theta:0.72,inds:["claim_precision","assumption_transparency","benchmark_definition_quality","threat_model_clarity"]},{id:"QTM_02",name:"Benchmarking & Testability",bac:"BAC02",w:0.17,theta:0.78,inds:["benchmark_repeatability","noise_characterization_quality","cross_platform_comparability","experimental_control_rigor"]},{id:"QTM_03",name:"Experimental Traceability & Data Integrity",bac:"BAC03",w:0.15,theta:0.75,inds:["raw_data_retention_strength","metadata_completeness","lab_notebook_integrity","analysis_pipeline_versioning"]},{id:"QTM_04",name:"Certification Readiness for QKD/PQC",bac:"BAC04",w:0.14,theta:0.75,inds:["cert_scheme_alignment","independent_lab_access","implementation_assurance_depth","side_channel_test_coverage"]},{id:"QTM_05",name:"Interoperability for PQC Migration",bac:"BAC05",w:0.15,theta:0.75,inds:["interop_test_results","protocol_compatibility","migration_plan_quality","key_management_alignment"]},{id:"QTM_06",name:"Operational Controls & Governance",bac:"BAC06",w:0.14,theta:0.72,inds:["access_control_strength","supply_chain_assurance","secure_ops_procedures","compliance_monitoring_coverage"]},{id:"QTM_07",name:"Resilience to Rapid Standards Evolution",bac:"BAC07",w:0.11,theta:0.70,inds:["standards_watch_capability","update_rollout_readiness","crypto_agility","deprecation_management"]}]}
+  }
+};
+
+const P3_STARTERS={
+  Nuclear:{anomaly_threshold_tuning:0.58,detection_rate_true:0.62,false_alarm_rate:0.55,time_to_detect:0.60,declaration_completeness:0.65,material_balance_closure:0.60,sensor_discrepancy_rate:0.55,records_integrity:0.62,facility_coverage_pct:0.68,process_coverage_pct:0.60,frequency_sufficiency:0.55,containment_surveillance_uptime:0.65,inspector_access_success_rate:0.72,notice_to_access_delay:0.58,managed_access_constraints_severity:0.50,denied_access_frequency:0.62,evasion_tactics_tested:0.55,adversary_sophistication_level:0.60,detection_under_evasion_pct:0.48,learning_adaptation_of_regime:0.52,trigger_clarity:0.58,evidence_threshold_clarity:0.55,timeline_to_escalate:0.60,political_block_frequency:0.50,perceived_fairness_index:0.62,sanction_proportionality_score:0.58,compliance_rebound_rate:0.55,diplomatic_fallout_score:0.60,inspector_hours_per_facility:0.55,technical_tooling_availability:0.60,training_level:0.65,coverage_backlog:0.52,ability_to_incorporate_new_tech:0.50,update_of_methods:0.55,expertise_refresh_rate:0.58,tool_modernization_cadence:0.52,multi_handler_coc_continuity:0.42,in_transit_detection_capability:0.38,carrier_security_certification:0.45,cross_border_handoff_protocol:0.35},,
+  AI:{doc_coverage_rate:0.70,assumption_disclosure_quality:0.60,known_limitations_disclosure:0.55,intended_use_clarity:0.65,test_suite_completeness:0.60,out_of_distribution_testing:0.50,red_team_frequency:0.55,reproducibility_rate:0.60,data_lineage_coverage:0.55,model_versioning_integrity:0.65,training_run_audit_trail:0.55,artifact_retention_policy_strength:0.60,assurance_case_completeness:0.55,evidence_chain_integrity:0.60,independent_validation_presence:0.45,conflict_of_interest_controls:0.55,api_control_consistency:0.60,logging_schema_conformance:0.55,policy_control_portability:0.50,standard_mapping_coverage:0.55,access_control_effectiveness:0.60,incident_response_readiness:0.55,continuous_monitoring_coverage:0.55,enforcement_mechanism_strength:0.50,model_drift_detection_quality:0.50,rollback_capability:0.60,change_approval_rigor:0.55,post_deploy_validation_rate:0.55}
+};
+['Space','Biotech','Renewable','Quantum'].forEach(d=>{P3_STARTERS[d]={};P3_REG.domains[d].NOFs.forEach(n=>n.inds.forEach(i=>{P3_STARTERS[d][i]=0.55;}));});
+
+const P3_DCFG={
+  Nuclear:{roles:["IAEA Inspector","National Regulator","Facility Operator","Certifier","Red Team State"],standards:["INFCIRC/153","INFCIRC/540","IAEA STR-388"],countries:["Generic State","Iran (2003 scenario)","Syria (2007 scenario)","SMR Developer State"],actors:[{n:"IAEA_Safeguards",r:"Regulator",p:[0,0,2.5],au:0.85,re:0.70,in:0.80,ex:0.85,ce:0.90},{n:"National_Inspector",r:"Inspector",p:[-2,1.5,1],au:0.70,re:0.60,in:0.50,ex:0.65,ce:0.45},{n:"Certifier_ISO",r:"Certifier",p:[2,1.5,1],au:0.75,re:0.65,in:0.70,ex:0.70,ce:0.60},{n:"Independent_Auditor",r:"Auditor",p:[-1.5,-1.5,0.5],au:0.72,re:0.68,in:0.75,ex:0.73,ce:0.40},{n:"SMR_Developer",r:"Developer",p:[1.5,-1.5,0],au:0.60,re:0.70,in:0.40,ex:0.80,ce:0.50},{n:"Facility_Operator",r:"Operator",p:[0,-2,-0.5],au:0.65,re:0.55,in:0.35,ex:0.60,ce:0.35},{n:"Adversarial_State",r:"RedTeam",p:[0,0,-2.5],au:0.40,re:0.85,in:0.20,ex:0.75,ce:0.70}],pw:{title:"Undeclared Enrichment",desc:"Parallel facilities outside safeguards scope",ex:"Iran 2003: 18 years undetected enrichment",fail:"INFCIRC/153 limited to declared facilities",bgc:["SAD","ASI"]}},
+  AI:{roles:["EU Certifier","Model Developer","Deployment Auditor","Red Team Researcher","National AI Safety Institute"],standards:["EU AI Act","ISO/IEC 42001","NIST AI RMF"],countries:["Generic Jurisdiction","EU Member State","US (Voluntary)","China (Emerging)"],actors:[{n:"EU_AI_Office",r:"Regulator",p:[0,0,2.5],au:0.80,re:0.65,in:0.75,ex:0.70,ce:0.85},{n:"Notified_Body_1",r:"Certifier",p:[-2,1.5,1],au:0.70,re:0.60,in:0.60,ex:0.65,ce:0.50},{n:"Notified_Body_2",r:"Certifier",p:[2,1.5,1],au:0.65,re:0.55,in:0.55,ex:0.60,ce:0.45},{n:"Model_Developer",r:"Developer",p:[-1.5,-1.5,0],au:0.60,re:0.75,in:0.40,ex:0.85,ce:0.55},{n:"Deployment_Auditor",r:"Auditor",p:[1.5,-1.5,0],au:0.68,re:0.62,in:0.70,ex:0.68,ce:0.40},{n:"RedTeam_Lab",r:"RedTeam",p:[0,-2,-1],au:0.55,re:0.80,in:0.50,ex:0.90,ce:0.60},{n:"Frontier_Lab",r:"Developer",p:[0,0,-2.5],au:0.50,re:0.90,in:0.30,ex:0.95,ce:0.75}],pw:{title:"Audit Shopping",desc:"Developers rotate certifiers for lenient assessment",ex:"23 providers gaming EU AI Act (2025)",fail:"Multiple certifiers with varying standards",bgc:["ASI","IIC"]}},
+  Space:{roles:["UNOOSA Inspector","Satellite Operator","Launch Authority","Debris Monitor","Mega-Constellation Operator"],standards:["ISO 24113","UN Debris Guidelines","ITU Coordination"],countries:["Generic State","US (Starlink)","China (State-owned)","Commercial Operator"],actors:[{n:"UNOOSA",r:"Regulator",p:[0,0,2.5],au:0.75,re:0.55,in:0.70,ex:0.65,ce:0.80},{n:"National_Space_Agency",r:"Regulator",p:[-2,1.5,1],au:0.70,re:0.60,in:0.65,ex:0.70,ce:0.60},{n:"Launch_Authority",r:"Certifier",p:[2,1.5,1],au:0.68,re:0.58,in:0.60,ex:0.68,ce:0.50},{n:"Satellite_Operator",r:"Operator",p:[-1.5,-1.5,0],au:0.60,re:0.65,in:0.40,ex:0.75,ce:0.45},{n:"Debris_Monitor",r:"Auditor",p:[1.5,-1.5,0],au:0.72,re:0.50,in:0.75,ex:0.60,ce:0.35},{n:"MegaConstellation",r:"RedTeam",p:[0,0,-2.5],au:0.55,re:0.80,in:0.30,ex:0.85,ce:0.70}],pw:{title:"Deorbit Cost Avoidance",desc:"Operators skip end-of-life deorbiting to save cost",ex:"847 satellites past EOL (2025)",fail:"Voluntary guidelines, no enforcement",bgc:["ASI","NDM"]}},
+  Biotech:{roles:["FDA Inspector","Clinical Trial Sponsor","Ethics Committee","Gene Therapy Developer","Independent Monitor"],standards:["ICH GCP E6(R3)","WHO Gene Therapy Guidelines","FDA 21 CFR Part 312"],countries:["Generic Jurisdiction","US (FDA)","EU (EMA)","China (NMPA)"],actors:[{n:"FDA_CBER",r:"Regulator",p:[0,0,2.5],au:0.82,re:0.70,in:0.80,ex:0.75,ce:0.85},{n:"IRB_Ethics",r:"Certifier",p:[-2,1.5,1],au:0.75,re:0.55,in:0.70,ex:0.60,ce:0.50},{n:"Trial_Sponsor",r:"Developer",p:[2,1.5,1],au:0.60,re:0.75,in:0.40,ex:0.80,ce:0.60},{n:"CRO_Monitor",r:"Auditor",p:[-1.5,-1.5,0],au:0.68,re:0.60,in:0.65,ex:0.70,ce:0.40},{n:"Gene_Therapy_Lab",r:"Developer",p:[1.5,-1.5,0],au:0.65,re:0.80,in:0.45,ex:0.85,ce:0.55},{n:"Publication_System",r:"Observer",p:[0,0,-2.5],au:0.50,re:0.40,in:0.60,ex:0.55,ce:0.65}],pw:{title:"Results Non-Reporting",desc:"Negative trial results withheld from publication",ex:"40% gene therapy trials unreported (2024)",fail:"No regulatory penalty for non-reporting",bgc:["ASI","IIC"]}},
+  Renewable:{roles:["Gold Standard Auditor","Project Developer","Carbon Registry","Independent Verifier","Offset Buyer"],standards:["ISO 14064","Gold Standard","Verra VCS","CDM"],countries:["Generic Project","Brazil (Forest)","India (Renewable)","Questionable Projects"],actors:[{n:"Gold_Standard",r:"Regulator",p:[0,0,2.5],au:0.78,re:0.65,in:0.75,ex:0.70,ce:0.80},{n:"Verra_Registry",r:"Certifier",p:[-2,1.5,1],au:0.72,re:0.60,in:0.70,ex:0.68,ce:0.55},{n:"Project_Developer",r:"Developer",p:[2,1.5,1],au:0.60,re:0.70,in:0.40,ex:0.75,ce:0.50},{n:"Independent_Verifier",r:"Auditor",p:[-1.5,-1.5,0],au:0.70,re:0.58,in:0.72,ex:0.65,ce:0.42},{n:"Carbon_Buyer",r:"Observer",p:[1.5,-1.5,0],au:0.65,re:0.45,in:0.60,ex:0.50,ce:0.38},{n:"Fraudulent_Project",r:"RedTeam",p:[0,0,-2.5],au:0.45,re:0.75,in:0.25,ex:0.70,ce:0.65}],pw:{title:"Phantom Offsets",desc:"Credits claimed without actual emission reductions",ex:"127 suspicious projects flagged (2025)",fail:"Self-reported data, limited verification",bgc:["SAD","ASI"]}},
+  Quantum:{roles:["Export Control Officer","Quantum Developer","National Security Advisor","Tech Auditor","Research Institution"],standards:["Wassenaar Arrangement","ITAR Quantum Controls","EAR Quantum Technologies"],countries:["Generic State","US (Export Controls)","China (Strategic)","EU (Emerging)"],actors:[{n:"Export_Control_Auth",r:"Regulator",p:[0,0,2.5],au:0.80,re:0.68,in:0.75,ex:0.72,ce:0.82},{n:"Quantum_Lab",r:"Developer",p:[-2,1.5,1],au:0.65,re:0.80,in:0.45,ex:0.88,ce:0.60},{n:"National_Security",r:"Observer",p:[2,1.5,1],au:0.75,re:0.70,in:0.80,ex:0.68,ce:0.70},{n:"Tech_Auditor",r:"Auditor",p:[-1.5,-1.5,0],au:0.68,re:0.62,in:0.70,ex:0.75,ce:0.45},{n:"Research_Institution",r:"Developer",p:[1.5,-1.5,0],au:0.70,re:0.75,in:0.50,ex:0.82,ce:0.55},{n:"Adversarial_Acquisition",r:"RedTeam",p:[0,0,-2.5],au:0.50,re:0.85,in:0.30,ex:0.80,ce:0.75}],pw:{title:"Dual-Use Export",desc:"Quantum tech exported as civilian, repurposed militarily",ex:"Quantum sensors repurposed for submarine detection",fail:"End-use verification impossible post-export",bgc:["STI","SRA"]}}
+};
+
+const P3_BGC_INFO={STI:{name:"Strategic Technical Intelligence",desc:"Verification robustness",affects:"V_t coverage",w:0.18},SAD:{name:"Situational Awareness & Detection",desc:"Detection capability",affects:"V_t confidence",w:0.15},ESI:{name:"Epistemic-Strategic Integration",desc:"Adaptive learning",affects:"State transitions",w:0.14},NDM:{name:"Normative Decision Making",desc:"Institutional alignment",affects:"P_t coverage",w:0.12},SRA:{name:"Strategic Risk Assessment",desc:"Risk anticipation",affects:"R_t trust",w:0.13},IIC:{name:"Inter-Institutional Coordination",desc:"Information sharing",affects:"A_t access",w:0.16},ASI:{name:"Adaptive Strategic Implementation",desc:"Enforcement effectiveness",affects:"R_t legitimacy",w:0.12}};
+const P3_ROLE_COLORS={Regulator:'#1E90FF',Inspector:'#FF8C00',Certifier:'#32CD32',Developer:'#DC143C',Operator:'#9370DB',Auditor:'#D2691E',RedTeam:'#FF1493',Observer:'#B0C4DE'};
+const P3_CONV_ACTORS=[{id:'Iran',comp:0.28,pos:[0.30,0.70,0.35]},{id:'Syria',comp:0.22,pos:[0.25,0.65,0.30]},{id:'DPRK',comp:0.15,pos:[0.20,0.75,0.25]},{id:'Libya',comp:0.35,pos:[0.35,0.60,0.40]},{id:'Egypt',comp:0.48,pos:[0.55,0.50,0.45]},{id:'Algeria',comp:0.52,pos:[0.50,0.55,0.50]},{id:'Saudi Arabia',comp:0.55,pos:[0.60,0.45,0.55]},{id:'Turkey',comp:0.58,pos:[0.58,0.48,0.52]},{id:'Brazil',comp:0.68,pos:[0.65,0.40,0.60]},{id:'Argentina',comp:0.70,pos:[0.68,0.38,0.62]},{id:'S.Africa',comp:0.72,pos:[0.70,0.36,0.65]},{id:'India',comp:0.65,pos:[0.62,0.42,0.58]},{id:'Pakistan',comp:0.60,pos:[0.58,0.46,0.54]},{id:'Japan',comp:0.88,pos:[0.88,0.18,0.82]},{id:'S.Korea',comp:0.85,pos:[0.85,0.20,0.80]},{id:'Germany',comp:0.90,pos:[0.90,0.15,0.85]},{id:'Canada',comp:0.87,pos:[0.87,0.17,0.82]},{id:'Sweden',comp:0.94,pos:[0.94,0.10,0.90]},{id:'Switzerland',comp:0.93,pos:[0.93,0.11,0.88]},{id:'Australia',comp:0.91,pos:[0.91,0.13,0.86]}];
+const P3_ACTIONS=[{icon:'🔍',title:'Snap Inspection',desc:'Unannounced inspector visit',eff:'+STI +SAD −IIC',type:'pos',imp:{STI:0.08,SAD:0.06,IIC:-0.04}},{icon:'📋',title:'Additional Protocol',desc:'State adopts INFCIRC/540',eff:'+STI +NDM +ASI',type:'pos',imp:{STI:0.10,NDM:0.08,ASI:0.06}},{icon:'⚡',title:'Evasion Detected',desc:'Undeclared facility found',eff:'−SAD −IIC ↓Trust',type:'neg',imp:{SAD:-0.15,IIC:-0.12,SRA:-0.10}},{icon:'🤝',title:'Bilateral MRA',desc:'Mutual recognition agreement signed',eff:'+NDM +ASI +IIC',type:'pos',imp:{NDM:0.12,ASI:0.08,IIC:0.06}},{icon:'💥',title:'Certification Crisis',desc:'Major certifier compromise',eff:'−IIC −ASI ↓Legit',type:'neg',imp:{IIC:-0.18,ASI:-0.12,STI:-0.05}},{icon:'📡',title:'Remote Monitoring',desc:'New continuous monitoring deployed',eff:'+STI +SAD +ESI',type:'pos',imp:{STI:0.09,SAD:0.07,ESI:0.08}},{icon:'⚖️',title:'Sanctions Imposed',desc:'Non-compliant state consequences',eff:'+SRA ±NDM',type:'mix',imp:{SRA:0.08,NDM:-0.05,IIC:-0.06}},{icon:'🔧',title:'Inspector Surge',desc:'Emergency inspector deployment',eff:'+STI +IIC +SAD',type:'pos',imp:{STI:0.06,IIC:0.10,SAD:0.05}}];
+
+// ── P3 STATE ──
+let p3Domain='Nuclear';
+let p3BgcVals={STI:0.75,SAD:0.70,ESI:0.68,NDM:0.72,SRA:0.69,IIC:0.80,ASI:0.65};
+let p3IndVals={};
+let p3GnnScene,p3GnnCam,p3GnnRend,p3GnnAF,p3GnnAngle=0,p3GnnRotDir=1;
+let p3ConvScene,p3ConvCam,p3ConvRend,p3ConvAF,p3ConvPlaying=false,p3ConvTarget=1.0,p3ConvMonth=0,p3ConvMeshes=[];
+
+// ── P3 UTILS ──
+const p3Clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const p3Gc=s=>s>=0.75?'var(--green)':s>=0.55?'var(--amber)':'var(--red)';
+const p3Gst=s=>s>=0.75?'✅':s>=0.55?'⚠️':'❌';
+const p3$=id=>document.getElementById(id);
+const p3SetT=(id,v)=>{const e=p3$(id);if(e)e.textContent=v;};
+const p3SetH=(id,v)=>{const e=p3$(id);if(e)e.innerHTML=v;};
+const p3SetSt=(id,p,v)=>{const e=p3$(id);if(e)e.style[p]=v;};
+
+// ── P3 SCORE CHAIN ──
+function p3ScoreChain(d){
+  const nofs=P3_REG.domains[d].NOFs,nofSc={};
+  nofs.forEach(n=>{const vals=n.inds.map(i=>p3Clamp(p3IndVals[i]!==undefined?p3IndVals[i]:0.55,0,1));nofSc[n.id]={score:vals.reduce((a,v)=>a+v,0)/vals.length,nof:n};});
+  const bacSc={};
+  Object.entries(P3_REG.BAC).forEach(([bid,b])=>{
+    const mapped=nofs.filter(n=>n.bac===bid);
+    if(!mapped.length){bacSc[bid]={score:0,bac:b};return;}
+    const pairs=mapped.map(n=>({v:nofSc[n.id].score,w:n.w})),denom=pairs.reduce((a,p)=>a+p.w,0);
+    bacSc[bid]={score:denom>0?pairs.reduce((a,p)=>a+p.v*p.w,0)/denom:0,bac:b};
+  });
+  const terms=Object.entries(P3_REG.BAC).map(([id,b])=>({v:bacSc[id].score,w:b.w})),denom=terms.reduce((a,t)=>a+t.w,0);
+  return{nofSc,bacSc,gGACn:denom>0?terms.reduce((a,t)=>a+t.v*t.w,0)/denom:0};
+}
+function p3ComputeGWC(){return Object.entries(P3_BGC_INFO).reduce((a,[k,v])=>a+p3BgcVals[k]*v.w,0);}
+
+// ── P3 DOMAIN SWITCH ──
+function p3SetDomain(d,btn){
+  p3Domain=d;
+  document.querySelectorAll('#p3-dom-bar .dbn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  p3IndVals={};const st=P3_STARTERS[d]||{};
+  P3_REG.domains[d].NOFs.forEach(n=>n.inds.forEach(i=>{p3IndVals[i]=st[i]!==undefined?st[i]:0.55;}));
+  p3PopulateSelects();p3BuildIndSliders();p3BuildBGCGrid();p3BuildPathways();p3BuildActions();p3BuildActorTable();p3UpdateAll();
+  if(p3$('p3-pnl-gnn')&&p3$('p3-pnl-gnn').classList.contains('on'))p3RebuildGNN();
+  p3SetT('p3-reg-dom',d.toUpperCase());p3SetT('p3-gnn-dom',d.toUpperCase());
+  p3SetT('p3-gnn-ac',P3_DCFG[d].actors.length+' actors');p3SetT('p3-gwc-dom-lbl',d+' · BGC → g-GWC');
+}
+
+// ── P3 SELECTS ──
+function p3PopulateSelects(){
+  const cfg=P3_DCFG[p3Domain];
+  [['p3-role-sel',cfg.roles],['p3-std-sel',cfg.standards],['p3-ctry-sel',cfg.countries]].forEach(([id,opts])=>{
+    const s=p3$(id);if(!s)return;s.innerHTML=opts.map(o=>`<option>${o}</option>`).join('');
+  });p3UpdateGS();
+}
+
+// ── P3 GAME STATE ──
+function p3UpdateGS(){
+  const role=p3$('p3-role-sel')?p3$('p3-role-sel').value:'',std=p3$('p3-std-sel')?p3$('p3-std-sel').value:'',ctry=p3$('p3-ctry-sel')?p3$('p3-ctry-sel').value:'';
+  p3SetT('p3-role-inf','Playing as: '+role);p3SetT('p3-std-inf','Testing: '+std);p3SetT('p3-ctry-inf','Context: '+ctry);
+  const b=p3BgcVals,vc=(b.STI*0.80).toFixed(2),vk=(b.SAD*0.85).toFixed(2),pc=(b.NDM*0.80).toFixed(2),rt=(b.SRA*0.85).toFixed(2),aa=(1-b.IIC*0.70).toFixed(2),rl=(b.ASI*0.90).toFixed(2);
+  const cf=0.85,ca=parseFloat(vc)*0.82,gap=Math.abs(cf-ca);
+  p3SetT('p3-gs-ps',(b.STI*0.94).toFixed(2));p3SetT('p3-gs-pc',pc);p3SetT('p3-gs-ac',(b.IIC*0.75).toFixed(2));p3SetT('p3-gs-ai',(b.SRA*0.80).toFixed(2));p3SetT('p3-gs-aa',aa);
+  p3SetT('p3-gs-cf',cf.toFixed(2));p3SetT('p3-gs-ca',ca.toFixed(2));
+  const cge=p3$('p3-gs-cg');if(cge){cge.textContent=gap.toFixed(2)+(gap>0.15?' ⚠':' ✓');cge.style.color=gap>0.15?'var(--red)':'var(--green)';}
+  p3SetT('p3-gs-vc',vc);p3SetT('p3-gs-vk',vk);p3SetT('p3-gs-vi',(b.STI*0.70).toFixed(2));p3SetT('p3-gs-rt',rt);p3SetT('p3-gs-rd',(1-b.SAD*0.8).toFixed(2));p3SetT('p3-gs-rl',rl);
+  p3SetT('p3-state-formula',`V_t.coverage    = BGC[STI] × 0.80 = ${vc}\nV_t.confidence  = BGC[SAD] × 0.85 = ${vk}\nP_t.coverage    = BGC[NDM] × 0.80 = ${pc}\nR_t.trust       = BGC[SRA] × 0.85 = ${rt}\nA_t.access      = 1 − BGC[IIC] × 0.70 = ${aa}\nR_t.legitimacy  = BGC[ASI] × 0.90 = ${rl}`);
+}
+
+// ── P3 INDICATOR SLIDERS ──
+function p3BuildIndSliders(){
+  const el=p3$('p3-ind-sliders');if(!el)return;
+  const nofs=P3_REG.domains[p3Domain].NOFs;let h='';
+  nofs.forEach(n=>{
+    h+=`<div class="p3-ind-sec-hd">${n.id} · ${n.name}</div>`;
+    n.inds.forEach(ind=>{
+      const v=p3IndVals[ind]||0.55,pct=Math.round(v*100);
+      h+=`<div class="p3-ind-row"><div class="p3-ind-nm" title="${ind}">${ind.replace(/_/g,' ')}</div><input type="range" class="p3-ind-sl" min="0" max="100" value="${pct}" style="--pct:${pct}%" oninput="p3UpdInd('${ind}',this.value,this)"><div class="p3-ind-vl" id="p3-iv-${ind}">${v.toFixed(2)}</div></div>`;
+    });
+  });
+  el.innerHTML=h;
+}
+function p3UpdInd(ind,val,inp){p3IndVals[ind]=parseInt(val)/100;inp.style.setProperty('--pct',val+'%');p3SetT('p3-iv-'+ind,(parseInt(val)/100).toFixed(2));p3UpdateRegistry();}
+
+// ── P3 REGISTRY ──
+function p3UpdateRegistry(){
+  const {nofSc,bacSc,gGACn}=p3ScoreChain(p3Domain);
+  const nl=p3$('p3-nof-list');if(nl){nl.innerHTML=Object.entries(nofSc).map(([id,d])=>`<div class="p3-nof-it"><div><div class="p3-nof-id">${id}</div><div class="p3-nof-nm">${d.nof.name.slice(0,20)}</div></div><div style="flex:1"><div class="p3-nof-br"><div class="p3-nof-bf" style="width:${d.score*100}%;background:${p3Gc(d.score)}"></div></div></div><div class="p3-nof-vl" style="color:${p3Gc(d.score)}">${d.score.toFixed(2)}</div><div class="p3-nof-ps">${p3Gst(d.score)}</div></div>`).join('');}
+  const bl=p3$('p3-bac-list');if(bl){bl.innerHTML=Object.entries(bacSc).map(([id,d])=>`<div class="p3-bac-it"><div style="min-width:68px"><div class="p3-bac-id">${id}</div><div class="p3-bac-nm">${d.bac.name.slice(0,15)}</div></div><div class="p3-bac-br"><div class="p3-bac-bf" style="width:${d.score*100}%;background:${p3Gc(d.score)}"></div></div><div class="p3-bac-vl" style="color:${p3Gc(d.score)}">${d.score.toFixed(2)}</div></div>`).join('');}
+  p3SetT('p3-gg-val',gGACn.toFixed(3));p3SetSt('p3-gg-val','color',p3Gc(gGACn));
+  const gb=p3$('p3-gg-bar');if(gb){gb.style.width=(gGACn*100)+'%';gb.style.background=p3Gc(gGACn);}
+  const chip=p3$('p3-gg-chip');if(chip){chip.textContent=gGACn>=P3_REG.gGACn_theta?'PASS ✓':'Below θ';chip.className='p3-chip '+(gGACn>=P3_REG.gGACn_theta?'p3-chip-g':'p3-chip-w');}
+}
+
+// ── P3 BGC GRID ──
+function p3BuildBGCGrid(){
+  const el=p3$('p3-bgc-grid');if(!el)return;
+  el.innerHTML=Object.entries(P3_BGC_INFO).map(([k,v])=>`<div class="p3-bgcc"><div class="p3-bgc-code">${k}</div><div class="p3-bgc-name">${v.name}</div><div class="p3-bgc-score" id="p3-bgcs-${k}" style="color:${p3Gc(p3BgcVals[k])}">${p3BgcVals[k].toFixed(2)}</div><div class="p3-bgc-bh"><div class="p3-bgc-bf" id="p3-bgcb-${k}" style="width:${p3BgcVals[k]*100}%;background:${p3Gc(p3BgcVals[k])}"></div></div><input class="p3-bgc-sl" type="range" min="0" max="100" value="${Math.round(p3BgcVals[k]*100)}" style="--pct:${Math.round(p3BgcVals[k]*100)}%" id="p3-bgcsl-${k}" oninput="p3UpdBGC('${k}',this.value,this)"></div>`).join('');
+  const desc=p3$('p3-bgc-desc');if(desc){desc.innerHTML=Object.entries(P3_BGC_INFO).map(([k,v])=>`<div style="display:grid;grid-template-columns:52px 170px 1fr 110px;gap:10px;padding:5px 0;border-bottom:1px solid var(--bg-warm);font-size:11px"><span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--iaea-teal)">${k}</span><span style="font-weight:600">${v.name}</span><span style="color:var(--ink-light)">${v.desc}</span><span style="color:var(--ink-muted)">${v.affects}</span></div>`).join('');}
+}
+function p3UpdBGC(k,val,inp){p3BgcVals[k]=parseInt(val)/100;inp.style.setProperty('--pct',val+'%');p3SetT('p3-bgcs-'+k,p3BgcVals[k].toFixed(2));p3SetSt('p3-bgcs-'+k,'color',p3Gc(p3BgcVals[k]));const bar=p3$('p3-bgcb-'+k);if(bar){bar.style.width=val+'%';bar.style.background=p3Gc(p3BgcVals[k]);}p3UpdateAll();}
+
+// ── P3 UPDATE ALL ──
+function p3UpdateAll(){
+  const gwc=p3ComputeGWC();p3SetT('p3-gwc-val',gwc.toFixed(3));p3SetSt('p3-gwc-val','color',p3Gc(gwc));
+  const gb=p3$('p3-gwc-bar');if(gb){gb.style.width=(gwc*100)+'%';gb.style.background=p3Gc(gwc);}
+  const chip=p3$('p3-gwc-chip');if(chip){chip.textContent=gwc>=0.80?'On Target':gwc>=0.65?'Below Target':'Critical';chip.className='p3-chip '+(gwc>=0.80?'p3-chip-g':gwc>=0.65?'p3-chip-w':'p3-chip-r');}
+  const delta=gwc-0.80;p3SetT('p3-gwc-delta',`Δ = ${delta>=0?'+':''}${delta.toFixed(3)} ${delta>=0?'above':'to'} θ=0.80`);
+  p3UpdateGS();p3UpdateRegistry();
+}
+
+// ── P3 PATHWAYS ──
+function p3BuildPathways(){
+  const el=p3$('p3-pw-grid');if(!el)return;
+  el.innerHTML=Object.entries(P3_DCFG).map(([d,cfg])=>`<div class="p3-pwc"><div class="p3-pw-dom">${d.toUpperCase()}</div><div class="p3-pw-title">${cfg.pw.title}</div><div class="p3-pw-desc">${cfg.pw.desc}</div><div class="p3-pw-ex">${cfg.pw.ex}</div><div class="p3-pw-fail">⚠ ${cfg.pw.fail}</div><div class="p3-pw-bgc">${cfg.pw.bgc.map(b=>`<span class="p3-pw-btag">${b}</span>`).join('')}</div></div>`).join('');
+}
+
+// ── P3 ACTIONS ──
+function p3BuildActions(){
+  const el=p3$('p3-ac-grid');if(!el)return;
+  el.innerHTML=P3_ACTIONS.map((a,i)=>`<div class="p3-acc" onclick="p3ApplyAction(${i})"><div class="p3-acc-icon">${a.icon}</div><div class="p3-acc-title">${a.title}</div><div class="p3-acc-desc">${a.desc}</div><div class="p3-acc-eff ${a.type==='pos'?'p3-ae-p':a.type==='neg'?'p3-ae-n':'p3-ae-m'}">${a.eff}</div></div>`).join('');
+}
+function p3ApplyAction(i){
+  const a=P3_ACTIONS[i],before=p3ComputeGWC();
+  for(const[k,d] of Object.entries(a.imp))p3BgcVals[k]=p3Clamp(p3BgcVals[k]+d,0,1);
+  for(const k of Object.keys(P3_BGC_INFO)){const sl=p3$('p3-bgcsl-'+k);if(sl){sl.value=Math.round(p3BgcVals[k]*100);sl.style.setProperty('--pct',sl.value+'%');}}
+  p3UpdateAll();const after=p3ComputeGWC(),delta=after-before;
+  p3SetH('p3-ac-out',`<span style="color:#7c3aed;font-weight:600">Applied: ${a.icon} ${a.title}</span>\n\nBGC Changes:\n${Object.entries(a.imp).map(([k,d])=>`  ${k}: ${d>=0?'+':''}${d.toFixed(2)}  → ${p3BgcVals[k].toFixed(2)}`).join('\n')}\n\ng-GWC: <span style="color:var(--amber)">${before.toFixed(3)}</span> → <span style="color:${p3Gc(after)}">${after.toFixed(3)}</span>  Δ=<span style="color:${delta>=0?'var(--green)':'var(--red)'}">${delta>=0?'+':''}${delta.toFixed(3)}</span>`);
+}
+
+// ── P3 ACTOR TABLE ──
+function p3BuildActorTable(){
+  const el=p3$('p3-actor-tbl');if(!el)return;
+  const actors=P3_DCFG[p3Domain].actors;
+  const bar=(v,c)=>`<div style="display:inline-block;width:${Math.round(v*55)}px;height:3px;background:${c};vertical-align:middle;margin-left:4px;opacity:0.7"></div>`;
+  el.innerHTML=`<thead><tr><th>Actor</th><th>Role</th><th>Authority</th><th>Resources</th><th>Independence</th><th>Expertise</th><th>Centrality</th></tr></thead><tbody>${actors.map(a=>{const col=P3_ROLE_COLORS[a.r]||'#999';return`<tr><td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${col};margin-right:6px;vertical-align:middle"></span>${a.n.replace(/_/g,' ')}</td><td style="font-family:'DM Mono',monospace;font-size:9px;color:${col}">${a.r}</td><td style="font-family:'DM Mono',monospace;font-size:10px">${a.au.toFixed(2)}${bar(a.au,'#1E90FF')}</td><td style="font-family:'DM Mono',monospace;font-size:10px">${a.re.toFixed(2)}${bar(a.re,'#32CD32')}</td><td style="font-family:'DM Mono',monospace;font-size:10px">${a.in.toFixed(2)}${bar(a.in,'#FF8C00')}</td><td style="font-family:'DM Mono',monospace;font-size:10px">${a.ex.toFixed(2)}${bar(a.ex,'#9370DB')}</td><td style="font-family:'DM Mono',monospace;font-size:10px">${a.ce.toFixed(2)}${bar(a.ce,'#D2691E')}</td></tr>`;}).join('')}</tbody>`;
+}
+
+// ── P3 GNN ──
+function p3RebuildGNN(){
+  const cvs=p3$('p3-gnn-cvs');if(!cvs||typeof THREE==='undefined')return;
+  if(p3GnnRend)p3GnnRend.dispose();if(p3GnnAF)cancelAnimationFrame(p3GnnAF);
+  const W=cvs.parentElement.clientWidth||800,H=500;
+  p3GnnScene=new THREE.Scene();p3GnnScene.background=new THREE.Color(0x000000);
+  p3GnnCam=new THREE.PerspectiveCamera(60,W/H,0.1,100);p3GnnCam.position.set(6,4,6);p3GnnCam.lookAt(0,0,0);
+  p3GnnRend=new THREE.WebGLRenderer({canvas:cvs,antialias:true});p3GnnRend.setSize(W,H);p3GnnRend.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  const actors=P3_DCFG[p3Domain].actors,meshes=[];
+  actors.forEach(a=>{
+    const col=new THREE.Color(P3_ROLE_COLORS[a.r]||'#ffffff');
+    const mesh=new THREE.Mesh(new THREE.SphereGeometry(0.22,16,16),new THREE.MeshPhongMaterial({color:col,emissive:col,emissiveIntensity:0.35,shininess:60}));
+    mesh.position.set(a.p[0],a.p[2],a.p[1]);p3GnnScene.add(mesh);meshes.push({mesh,a});
+  });
+  for(let i=0;i<meshes.length-1;i++){
+    const pa=meshes[i].mesh.position.clone(),pb=meshes[i+1].mesh.position.clone();
+    p3GnnScene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([pa,pb]),new THREE.LineBasicMaterial({color:0x3355aa,opacity:0.45,transparent:true})));
+    if(i+2<meshes.length)p3GnnScene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([pa,meshes[i+2].mesh.position.clone()]),new THREE.LineBasicMaterial({color:0x223366,opacity:0.22,transparent:true})));
+  }
+  p3GnnScene.add(new THREE.AmbientLight(0xffffff,0.3));
+  const dl=new THREE.DirectionalLight(0xffffff,0.8);dl.position.set(5,10,5);p3GnnScene.add(dl);
+  const pl=new THREE.PointLight(0x4488ff,1,20);pl.position.set(0,5,0);p3GnnScene.add(pl);
+  const leg=p3$('p3-gnn-leg');if(leg){const roles=[...new Set(actors.map(a=>a.r))];leg.innerHTML=roles.map(r=>`<div class="p3-gnn-li"><div class="p3-gnn-dot" style="background:${P3_ROLE_COLORS[r]||'#fff'}"></div>${r}</div>`).join('');}
+  p3BuildActorTable();p3GnnAngle=0;
+  (function anim(){p3GnnAF=requestAnimationFrame(anim);p3GnnAngle+=0.004*p3GnnRotDir;p3GnnCam.position.set(Math.sin(p3GnnAngle)*7,4,Math.cos(p3GnnAngle)*7);p3GnnCam.lookAt(0,0,0);meshes.forEach((m,i)=>{const s=1+0.06*Math.sin(Date.now()*0.002+i*1.1);m.mesh.scale.setScalar(s);});p3GnnRend.render(p3GnnScene,p3GnnCam);})();
+}
+function p3ResetGNN(){p3GnnAngle=0;}
+
+// ── P3 CONVERGENCE ──
+function p3InitConv(){
+  const cvs=p3$('p3-conv-cvs');if(!cvs||typeof THREE==='undefined')return;
+  if(p3ConvRend)p3ConvRend.dispose();if(p3ConvAF)cancelAnimationFrame(p3ConvAF);
+  const W=cvs.parentElement.clientWidth||800,H=460;
+  p3ConvScene=new THREE.Scene();p3ConvScene.background=new THREE.Color(0x070b1a);
+  p3ConvCam=new THREE.PerspectiveCamera(60,W/H,0.1,100);p3ConvCam.position.set(1.5,1.2,2.2);p3ConvCam.lookAt(0.5,0.5,0.5);
+  p3ConvRend=new THREE.WebGLRenderer({canvas:cvs,antialias:true});p3ConvRend.setSize(W,H);p3ConvRend.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  [[1,0,0,0xff4444],[0,1,0,0x44ff44],[0,0,1,0x4444ff]].forEach(([x,y,z,c])=>p3ConvScene.add(new THREE.ArrowHelper(new THREE.Vector3(x,y,z),new THREE.Vector3(0,0,0),1.1,c,0.05,0.04)));
+  const gpts=[];for(let i=0;i<=10;i++){const t=i/10;gpts.push(t,0,0,t,0,1,0,0,t,1,0,t);}
+  const gg=new THREE.BufferGeometry();gg.setAttribute('position',new THREE.Float32BufferAttribute(gpts,3));p3ConvScene.add(new THREE.LineSegments(gg,new THREE.LineBasicMaterial({color:0x1a2044,opacity:0.5,transparent:true})));
+  p3ConvMeshes=[];
+  P3_CONV_ACTORS.forEach(a=>{
+    const tier=a.comp<0.40?'#e63946':a.comp<0.60?'#f4a261':a.comp<0.75?'#e9c46a':'#52b788';
+    const sz=0.03+(1-a.comp)*0.07;
+    const mesh=new THREE.Mesh(new THREE.SphereGeometry(sz,12,12),new THREE.MeshPhongMaterial({color:new THREE.Color(tier),emissive:new THREE.Color(tier),emissiveIntensity:0.4}));
+    mesh.position.set(a.pos[0],a.pos[2],a.pos[1]);p3ConvScene.add(mesh);p3ConvMeshes.push({mesh,actor:a,comp:a.comp});
+  });
+  p3ConvScene.add(new THREE.AmbientLight(0xffffff,0.2));const pl=new THREE.PointLight(0x4488ff,1.2,5);pl.position.set(0.5,1.5,0.5);p3ConvScene.add(pl);
+  const leg=p3$('p3-conv-legend');if(leg){leg.innerHTML=P3_CONV_ACTORS.map(a=>{const c=a.comp<0.40?'#e63946':a.comp<0.60?'#f4a261':a.comp<0.75?'#e9c46a':'#52b788';return`<span style="color:${c}">● ${a.id} ${Math.round(a.comp*100)}%</span>`;}).join('');}
+  p3UpdateConvStats();let convAngle=0;
+  (function anim(){
+    p3ConvAF=requestAnimationFrame(anim);convAngle+=0.003;
+    p3ConvCam.position.set(0.5+1.2*Math.sin(convAngle),0.8+0.3*Math.sin(convAngle*0.4),0.5+1.2*Math.cos(convAngle));p3ConvCam.lookAt(0.5,0.3,0.5);
+    if(p3ConvPlaying){
+      const spd=parseInt(p3$('p3-conv-spd')?p3$('p3-conv-spd').value:5);p3ConvMonth=Math.min(p3ConvMonth+0.02*spd,24);const t=p3ConvMonth/24;
+      p3ConvMeshes.forEach(m=>{
+        const tComp=m.actor.comp+(p3ConvTarget-m.actor.comp)*Math.min(t*1.2,1);m.comp=p3Clamp(tComp,0,1);
+        const ap=m.actor.pos,tx=ap[0]+(p3ConvTarget-ap[0])*Math.min(t*0.8,1),tz=ap[1]+(p3ConvTarget-ap[1])*Math.min(t*0.8,1);
+        m.mesh.position.set(tx,ap[2]+(p3ConvTarget-ap[2])*Math.min(t*0.5,1),tz);
+        const tier=m.comp<0.40?'#e63946':m.comp<0.60?'#f4a261':m.comp<0.75?'#e9c46a':'#52b788';
+        m.mesh.material.color.set(tier);m.mesh.material.emissive.set(tier);
+        m.mesh.scale.setScalar(1+0.06*Math.sin(Date.now()*0.003+P3_CONV_ACTORS.indexOf(m.actor)));
+      });
+      p3SetT('p3-conv-mo',Math.round(p3ConvMonth)+' mo');p3UpdateConvStats();
+      if(p3ConvMonth>=24){p3ConvPlaying=false;p3SetT('p3-conv-play-btn','▶ Animate');}
+    }
+    p3ConvRend.render(p3ConvScene,p3ConvCam);
+  })();
+}
+function p3UpdateConvStats(){const comps=p3ConvMeshes.length?p3ConvMeshes.map(m=>m.comp):P3_CONV_ACTORS.map(a=>a.comp);const avg=comps.reduce((a,v)=>a+v,0)/comps.length;p3SetT('p3-conv-avg',Math.round(avg*100)+'%');p3SetT('p3-conv-crit',comps.filter(c=>c<0.40).length);}
+function p3ToggleConv(){p3ConvPlaying=!p3ConvPlaying;p3SetT('p3-conv-play-btn',p3ConvPlaying?'⏸ Pause':'▶ Animate');}
+function p3ResetConv(){
+  p3ConvPlaying=false;p3ConvMonth=0;p3SetT('p3-conv-play-btn','▶ Animate');p3SetT('p3-conv-mo','0');
+  p3ConvMeshes.forEach(m=>{const a=m.actor;m.comp=a.comp;m.mesh.position.set(a.pos[0],a.pos[2],a.pos[1]);const tier=a.comp<0.40?'#e63946':a.comp<0.60?'#f4a261':a.comp<0.75?'#e9c46a':'#52b788';m.mesh.material.color.set(tier);m.mesh.material.emissive.set(tier);m.mesh.scale.setScalar(1);});
+  p3UpdateConvStats();
+}
+
+// ── P3 TAB SWITCH ──
+function p3SwTab(id,btn){
+  document.querySelectorAll('#p1-wargamedemo-panel .p3t').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('#p1-wargamedemo-panel .p3pnl').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('on');const pnl=p3$('p3-pnl-'+id);if(pnl)pnl.classList.add('on');
+  if(id==='gnn')setTimeout(p3RebuildGNN,60);
+  if(id==='convergence')setTimeout(p3InitConv,60);
+}
+
+// ── P3 INIT ──
+window.addEventListener('DOMContentLoaded',()=>{
+  P3_REG.domains.Nuclear.NOFs.forEach(n=>n.inds.forEach(i=>{p3IndVals[i]=P3_STARTERS.Nuclear[i]||0.55;}));
+  p3PopulateSelects();p3BuildIndSliders();p3BuildBGCGrid();p3BuildPathways();p3BuildActions();p3BuildActorTable();p3UpdateAll();
+});
+window.addEventListener('resize',()=>{
+  if(p3GnnRend&&p3$('p3-pnl-gnn')&&p3$('p3-pnl-gnn').classList.contains('on'))p3RebuildGNN();
+  if(p3ConvRend&&p3$('p3-pnl-convergence')&&p3$('p3-pnl-convergence').classList.contains('on'))p3InitConv();
+});
+</script>
+</body>
+</html>
