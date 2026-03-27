@@ -1,0 +1,91 @@
+AURACELLE AI GOVERNANCE LABS
+PROPRIETARY SOFTWARE LICENSE
+
+Copyright © 2026 Grace-Alice Evans / Auracelle AI Governance Labs
+All rights reserved.
+
+================================================================================
+PROPRIETARY AND CONFIDENTIAL
+================================================================================
+
+This software, simulation platform, and all associated files, frameworks,
+methodologies, scoring architectures, indicator taxonomies, mathematical
+formalizations, and documentation (collectively, the "Software") are the
+exclusive proprietary intellectual property of Grace-Alice Evans and
+Auracelle AI Governance Labs.
+
+GRANT OF LICENSE
+
+No license, express or implied, is granted to any person or entity to use,
+copy, modify, merge, publish, distribute, sublicense, sell, or otherwise
+exploit the Software or any portion thereof without the prior written
+authorization of Auracelle AI Governance Labs.
+
+PERMITTED USE
+
+Access to this repository is granted solely for the following purposes:
+
+  1. Personal reference and archival use by the copyright holder.
+  2. Review by explicitly authorized collaborators, supervisors, or
+     institutional partners under a separate written agreement.
+  3. Demonstration to prospective institutional partners, funders, or
+     research collaborators in a read-only, non-derivative capacity.
+
+RESTRICTIONS
+
+The following are expressly prohibited without prior written consent:
+
+  1. Reproduction or redistribution of the Software or any portion thereof.
+  2. Adaptation, modification, or creation of derivative works based on
+     the Software, its frameworks, or its methodologies.
+  3. Use of the scoring architecture, indicator taxonomy, or mathematical
+     formalization in any product, publication, or service.
+  4. Reverse engineering or extraction of proprietary framework components
+     for independent use.
+  5. Commercial use of any kind.
+  6. Training, fine-tuning, or otherwise incorporating the Software into
+     any machine learning model or AI system.
+
+INTELLECTUAL PROPERTY
+
+The following are proprietary to Auracelle AI Governance Labs and are
+protected as trade secrets and intellectual property:
+
+  - The E-AGPO-HT framework and all associated taxonomies
+  - The E-AGSO-HT framework and all associated taxonomies
+  - The E-IAIG-HT framework
+  - The hierarchical scoring architecture (Stratum I / II / III)
+  - All Narrow Operational Factor (NOF) definitions and indicator vectors
+  - All Broad Assurance/Governance Capability (BAC/BGC) definitions
+  - The g-GWC and g-GAC composite scoring methodologies
+  - The Auracelle simulation suite (Bach, Mozart, Charlie, Orion, Lyra, Delphi)
+  - The Oman Threshold scenario and associated NOF calibration vectors
+
+ACADEMIC USE
+
+This Software supports doctoral research conducted at Bath Spa University.
+Academic use by the copyright holder and supervising faculty is permitted
+under the terms of the relevant university research agreement. No rights
+are transferred to Bath Spa University or any other academic institution
+beyond those expressly agreed in writing.
+
+DISCLAIMER OF WARRANTIES
+
+THE SOFTWARE IS PROVIDED "AS IS" FOR AUTHORIZED PURPOSES ONLY.
+AURACELLE AI GOVERNANCE LABS MAKES NO WARRANTIES, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY OR FITNESS
+FOR A PARTICULAR PURPOSE.
+
+LIMITATION OF LIABILITY
+
+IN NO EVENT SHALL AURACELLE AI GOVERNANCE LABS OR GRACE-ALICE EVANS BE
+LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM OR IN
+CONNECTION WITH THE SOFTWARE OR ITS USE.
+
+================================================================================
+
+For licensing inquiries, collaboration proposals, or institutional access:
+Auracelle AI Governance Labs
+Contact via: auracelle.ai
+
+================================================================================
